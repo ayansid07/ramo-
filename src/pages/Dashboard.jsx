@@ -3,7 +3,7 @@ import { BsCurrencyDollar } from "react-icons/bs";
 import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosMore } from "react-icons/io";
 import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
-
+import axios from "axios";
 import { Stacked, Pie, Button, LineChart, SparkLine } from "../components";
 import {
   earningData,
@@ -16,6 +16,22 @@ import {
 } from "../data/dummy";
 import { useStateContext } from "../contexts/ContextProvider";
 import product9 from "../data/product9.jpg";
+
+const countComponent = () => {
+  const [data,setdata] = useState([]);
+  const [totalmembers,settotalmembers] = useState(0);
+
+  useEffect(() => {
+    axios.get('http://localhost:3001/read')
+    .then(response=> {
+      setdata(response.data)
+      settotalmembers(response.data.length);
+    })
+    .catch(error => {
+      // Error Handling
+    });
+  }, []);
+};
 
 const DropDown = ({ currentMode }) => (
   <div className="w-28 border-1 border-color px-2 py-1 rounded-md">
