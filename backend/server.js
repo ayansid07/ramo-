@@ -132,20 +132,7 @@ const limiter = rateLimit({
 // Create Function
 app.post('/create', limiter, async (req, res) => {
     const {
-      firstName,
-      lastName,
-      businessName,
-      email,
-      branch,
-      countryCode,
-      mobile,
-      password,
-      gender,
-      city,
-      state,
-      zipCode,
-      address,
-      creditSource,
+      firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,
     } = req.body;
 
     let role = 'user';
@@ -157,22 +144,7 @@ app.post('/create', limiter, async (req, res) => {
     }
 
     try {
-      const newUser = new userModel({
-        firstName,
-        lastName,
-        businessName,
-        email,
-        branch,
-        countryCode,
-        mobile,
-        password,
-        gender,
-        city,
-        state,
-        zipCode,
-        address,
-        creditSource,
-        role,
+      const newUser = new userModel({firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,role,
       });
   
       await newUser.save();
@@ -284,6 +256,7 @@ try {
   res.status(500).json({ message: 'Error deleting user' });
 }
 });
+
 
 
 app.listen(PORT, () => {
