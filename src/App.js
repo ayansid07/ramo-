@@ -25,30 +25,30 @@ import { useStateContext } from './contexts/ContextProvider';
 const App = () => {
   const [authenticated, setAuthenticated] = useState(false);
   // Development Code
-  setAuthenticated(true);
+  // setAuthenticated(true);
 
   // Production Code
-  // useEffect(() => {
-  //   // Prodfuc] Code
-  //   // Check if a valid token exists in local storage
-  //   const token = localStorage.getItem('token');
-  //   if (token) {
-  //     // Verify the token on the server to check its validity
-  //     axios.get('http://localhost:3001/verify-token', {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     })
-  //       .then(() => {
-  //         // Token is valid, user is authenticated
-  //         setAuthenticated(true);
-  //       })
-  //       .catch(() => {
-  //         // Token is invalid, remove it from local storage
-  //         localStorage.removeItem('token');
-  //       });
-  //   }
-  // }, []);
+  useEffect(() => {
+    // Prodfuc] Code
+    // Check if a valid token exists in local storage
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Verify the token on the server to check its validity
+      axios.get('http://localhost:3001/verify-token', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(() => {
+          // Token is valid, user is authenticated
+          setAuthenticated(true);
+        })
+        .catch(() => {
+          // Token is invalid, remove it from local storage
+          localStorage.removeItem('token');
+        });
+    }
+  }, []);
 
   return (
       <BrowserRouter>
