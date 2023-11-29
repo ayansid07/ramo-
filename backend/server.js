@@ -23,6 +23,7 @@ db.once('open', () => {
   console.log('Connected to MongoDB Atlas');
 });
 
+// User login database
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true,},
   lastName: {type: String,required: true,},
@@ -44,19 +45,28 @@ const userSchema = new mongoose.Schema({
 const loanSchema = new mongoose.Schema({
   borrowerName: { type: String, required: true },
   amount: { type: Number, required: true },
+  CustomerID: { type: Number, required: true },
+  email: {type: String,required: true,unique: true,},
+  ProjectName: { type: String },
+  Status: { type: String, enum: ['Active', 'Inactive', 'Cancel'], default: 'Active' },
+  CustomerImage: { type: String },
+  StatusBg: { type: String },
+  Weeks: { type: String },
+  Budget: { type: String },
+  Location: { type: String },
   interestRate: { type: Number, required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  status: { type: String, enum: ['Pending', 'Active', 'Closed', 'Defaulted'], default: 'Pending' },
+  status: { type: String, enum: ['Pending', 'Active', 'Closed', 'Defaulted', 'Cancelled'], default: 'Pending' },
   collateral: { type: String },
   purpose: { type: String },
   repayments: [{
     amountPaid: { type: Number, required: true },
     datePaid: { type: Date, default: Date.now },
-    paymentMode: { type: String }, // E.g., 'Cash', 'Bank Transfer', 'Credit Card'
-    paymentReference: { type: String }, // Reference number for the payment
-    paymentStatus: { type: String }, // E.g., 'Successful', 'Pending', 'Failed'
-    // Add more fields as needed
+    paymentMode: { type: String },
+    paymentReference: { type: String },
+    paymentStatus: { type: String }
+    // Add more fields as needed for repayments
   }]
 }, { collection: 'loans' });
 
@@ -175,6 +185,7 @@ app.post('/login', limiter, async (req, res) => {
     const payload = {
       userId: user._id,
       email: user.email,
+      username: user.firstName,
       // Add other necessary user information to the payload
     };
 

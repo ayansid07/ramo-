@@ -29,7 +29,6 @@ const App = () => {
 
   // Production Code
   useEffect(() => {
-    // Prodfuc] Code
     // Check if a valid token exists in local storage
     const token = localStorage.getItem('token');
     if (token) {
