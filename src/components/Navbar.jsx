@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { AiOutlineMenu } from 'react-icons/ai';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { IoLogOut } from "react-icons/io5";
@@ -26,14 +26,30 @@ const NavButton = ({ title, customFunc, icon, color, dotColor }) => (
 
 const Navbar = () => {
   const { currentColor, activeMenu, setActiveMenu, handleClick, isClicked, setScreenSize, screenSize } = useStateContext();
-  const jwt = require('jsonwebtoken');
   const [ usero,setusername] = useState(0);
 
-  // Assuming 'token' is the JWT received from the client or stored in localStorage
-  const token = localStorage['token'];
-  const decodedToken = jwt.decode(token);
-  const username = decodedToken.username; // Assuming 'username' is the key containing the username
-  setusername(username);
+  // Get the token from localStorage
+  const token = localStorage.getItem('token');
+
+  // Make a POST request to send the token to the server
+  fetch('http://localhost:3001/usernamedata', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ token }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      // Display the username on the frontend
+      console.log('Username:', data.username); // Assuming the server sends the decoded username back
+      // Update your frontend UI to show the username
+      setusername(data.username);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // Handle errors that occurred during the request
+    });
 
   const handleLogout = () => {
     localStorage.removeItem('token');

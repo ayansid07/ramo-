@@ -268,7 +268,29 @@ try {
 }
 });
 
+// Endpoint to handle the incoming POST request with the token
+app.post('/usernamedata', (req, res) => {
+  const { token } = req.body;
+  // Check if the token exists
+  if (!token) {
+    return res.status(401).json({ error: 'Token is missing' });
+  }
 
+  try {
+    // Verify and decode the token to extract the username
+    const decoded = jwt.verify(token, 'yourSecretKey');
+
+    // Extract the username from the decoded token payload
+    const { username } = decoded;
+
+    // Send the decoded username back to the client
+    res.json({ username });
+  } catch (err) {
+    // Handle token verification or decoding errors
+    console.error('Token verification error:', err);
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
