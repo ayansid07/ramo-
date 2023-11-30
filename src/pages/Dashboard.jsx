@@ -3,7 +3,7 @@ import { BsCurrencyDollar } from "react-icons/bs";
 import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosMore } from "react-icons/io";
 import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
-import axios from "axios";
+
 import { Stacked, Pie, Button, LineChart, SparkLine } from "../components";
 import {
   earningData,
@@ -16,22 +16,6 @@ import {
 } from "../data/dummy";
 import { useStateContext } from "../contexts/ContextProvider";
 import product9 from "../data/product9.jpg";
-
-const countComponent = () => {
-  const [data,setdata] = useState([]);
-  const [totalmembers,settotalmembers] = useState(0);
-
-  useEffect(() => {
-    axios.get('http://localhost:3001/read')
-    .then(response=> {
-      setdata(response.data)
-      settotalmembers(response.data.length);
-    })
-    .catch(error => {
-      // Error Handling
-    });
-  }, []);
-};
 
 const DropDown = ({ currentMode }) => (
   <div className="w-28 border-1 border-color px-2 py-1 rounded-md">
@@ -124,33 +108,8 @@ const Ecommerce = () => {
               />
           </div>
         </div>
+</div>
 {/* 4th card end */}
-
-
-        {/* <div className="flex m-3 flex-wrap justify-center gap-6 items-center">
-          {earningData.map((item) => (
-            <div
-              key={item.title}
-              className="bg-white h-44 dark:text-gray-200 dark:bg-secondary-dark-bg md:w-48  p-6 pt-9 rounded-2xl "
-            >
-              <button
-                type="button"
-                style={{ color: item.iconColor, backgroundColor: item.iconBg }}
-                className="text-2xl opacity-0.9 rounded-full  p-4 hover:drop-shadow-xl"
-              >
-                {item.icon}
-              </button>
-              <p className="mt-3">
-                <span className="text-lg font-semibold">{item.amount}</span>
-                <span className={`text-sm text-${item.pcColor} ml-2`}>
-                  {item.percentage}
-                </span>
-              </p>
-              <p className="text-sm text-gray-400  mt-1">{item.title}</p>
-            </div>
-          ))}
-        </div> */}
-    </div>
 
       <div className="flex flex-wrap justify-center">
         <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg m-3 p-4 rounded-2xl md:w-760 w-90">
@@ -171,25 +130,6 @@ const Ecommerce = () => {
               />
               </div>
 
-              {/* <div className="mt-5">
-                <SparkLine
-                  currentColor={currentColor}
-                  id="line-sparkLine"
-                  type="Line"
-                  height="80px"
-                  width="250px"
-                  data={SparklineAreaData}
-                  color={currentColor}
-                />
-              </div>
-              <div className="mt-10">
-                <Button
-                  color="white"
-                  bgColor={currentColor}
-                  text="Download Report"
-                  borderRadius="10px"
-                />
-              </div> */}
             </div>
             <div>
               <Stacked currentMode={currentMode} width="320px" height="360px" />
@@ -204,18 +144,23 @@ const Ecommerce = () => {
       <table className='table text-center bg-info text-white'>
         <thead>
           <tr class="table-secondary">
-            <th>Name</th>
-            <th>Fees</th>
-            <th>Duration</th>
-            <th>Comments</th>
+            <th>Date</th>
+            <th>Member</th>
+            <th>Account Number</th>
+            <th>Amount</th>
+            <th>Debit/Credit</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Action</th>
+				
           </tr>
         </thead>
-
-        {/* <tbody class="table-success">
+{/* 
+        <tbody class="table-success">
           {data.map(()=>{
             return(
               <tr key={i}>
-                <td> {} </td>
+                <td> <h3>dfghj</h3> </td>
                 <td> {} </td>
                 <td> {} </td>
                 <td> {} </td>
@@ -231,3 +176,6 @@ const Ecommerce = () => {
 };
 
 export default Ecommerce;
+
+
+
