@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect,useState } from 'react';
+import axios from 'axios';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { FiSettings } from 'react-icons/fi';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import Branches from './pages/Branches';
@@ -7,6 +8,8 @@ import Members  from "./pages/Members";
 import Accounts  from "./pages/Accounts";
 import Repayments  from "./pages/Repayments";
 import Loans  from "./pages/Loans";
+import Login from './pages/login';
+import Register from './pages/register';
 import Deposit  from "./pages/Deposit";
 import Dashboard from './pages/Dashboard'
 import Withdraw  from "./pages/Withdraw";
@@ -20,20 +23,55 @@ import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 
 const App = () => {
-  const { setCurrentColor, setCurrentMode, currentMode, activeMenu, currentColor, themeSettings, setThemeSettings } = useStateContext();
+  // For Direct to Dashboard
+  // const [authenticated,setAuthenticated] = useState(false);
+  // setAuthenticated(true);
 
-  useEffect(() => {
-    const currentThemeColor = localStorage.getItem('colorMode');
-    const currentThemeMode = localStorage.getItem('themeMode');
-    if (currentThemeColor && currentThemeMode) {
-      setCurrentColor(currentThemeColor);
-      setCurrentMode(currentThemeMode);
-    }
-  }, []);
-
+  // For Password based System
+  const [authenticated, setAuthenticated] = useState(false);
+    // Production Code
+    useEffect(() => {
+      // Check if a valid token exists in local storage
+      const token = localStorage.getItem('token');
+      if (token) {
+        // Verify the token on the server to check its validity
+        axios.get('http://localhost:3001/verify-token', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then(() => {
+            // Token is valid, user is authenticated
+            setAuthenticated(true);
+          })
+          .catch(() => {
+            // Token is invalid, remove it from local storage
+            localStorage.removeItem('token');
+          });
+      }
+    }, []);
   return (
-    <div className={currentMode === 'Dark' ? 'dark' : ''}>
       <BrowserRouter>
+      {authenticated ? (
+            <AuthenticatedRoutes />
+          ) : (
+            <UnauthenticatedRoutes />
+          )}
+        </BrowserRouter>
+        );
+      };
+      const AuthenticatedRoutes = () => {
+        
+        const { setCurrentColor, setCurrentMode, currentMode, activeMenu, currentColor, themeSettings, setThemeSettings } = useStateContext();
+
+        const currentThemeColor = localStorage.getItem('colorMode');
+        const currentThemeMode = localStorage.getItem('themeMode');
+        if (currentThemeColor && currentThemeMode) {
+          setCurrentColor(currentThemeColor);
+          setCurrentMode(currentThemeMode);
+        }    
+        return (
+        <div className={currentMode === 'Dark' ? 'dark' : ''}>
         <div className="flex relative dark:bg-main-dark-bg">
           <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
             <TooltipComponent
@@ -88,15 +126,22 @@ const App = () => {
                 <Route path='/transaction' element={<Transaction/>}/>
                 <Route path='/expense' element={<Expense/>}/>
                 <Route path='/user' element={<User/>}/>
-            
-
+  
               </Routes>
             </div>
             <Footer />
           </div>
         </div>
-      </BrowserRouter>
-    </div>
+      </div>  
+  );
+};
+const UnauthenticatedRoutes = () => {
+  return (
+    <Routes>
+      {/* Show the login page if not authenticated */}
+      <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+     </Routes>
   );
 };
 

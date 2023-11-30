@@ -102,7 +102,7 @@ const Branches = () => {
 
     <div className="d-flex mb-2">
         <Button className="mr-2" onClick={() => { setFormData({}); handleOpenModal(); }}>
-          Add Loan
+          Add Branch
         </Button>
         <FormControl
           className='custom-search-bar'

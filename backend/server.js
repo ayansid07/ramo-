@@ -23,6 +23,7 @@ db.once('open', () => {
   console.log('Connected to MongoDB Atlas');
 });
 
+// User login database
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true,},
   lastName: {type: String,required: true,},
@@ -41,73 +42,81 @@ const userSchema = new mongoose.Schema({
   role: {type: String,required: true,},
 },{collection: 'userdata'});
 
-const loanSchema = new mongoose.Schema({
-  borrowerName: { type: String, required: true },
-  amount: { type: Number, required: true },
-  interestRate: { type: Number, required: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
-  status: { type: String, enum: ['Pending', 'Active', 'Closed', 'Defaulted'], default: 'Pending' },
-  collateral: { type: String },
-  purpose: { type: String },
-  repayments: [{
-    amountPaid: { type: Number, required: true },
-    datePaid: { type: Date, default: Date.now },
-    paymentMode: { type: String }, // E.g., 'Cash', 'Bank Transfer', 'Credit Card'
-    paymentReference: { type: String }, // Reference number for the payment
-    paymentStatus: { type: String }, // E.g., 'Successful', 'Pending', 'Failed'
-    // Add more fields as needed
-  }]
-}, { collection: 'loans' });
+// const loanSchema = new mongoose.Schema({
+//   borrowerName: { type: String, required: true },
+//   amount: { type: Number, required: true },
+//   CustomerID: { type: Number, required: true },
+//   email: {type: String,required: true,unique: true,},
+//   ProjectName: { type: String },
+//   Status: { type: String, enum: ['Active', 'Inactive', 'Cancel'], default: 'Active' },
+//   CustomerImage: { type: String },
+//   StatusBg: { type: String },
+//   Weeks: { type: String },
+//   Budget: { type: String },
+//   Location: { type: String },
+//   interestRate: { type: Number, required: true },
+//   startDate: { type: Date, required: true },
+//   endDate: { type: Date, required: true },
+//   status: { type: String, enum: ['Pending', 'Active', 'Closed', 'Defaulted', 'Cancelled'], default: 'Pending' },
+//   collateral: { type: String },
+//   purpose: { type: String },
+//   repayments: [{
+//     amountPaid: { type: Number, required: true },
+//     datePaid: { type: Date, default: Date.now },
+//     paymentMode: { type: String },
+//     paymentReference: { type: String },
+//     paymentStatus: { type: String }
+//     // Add more fields as needed for repayments
+//   }]
+// }, { collection: 'loans' });
 
+// const transactionSchema = new mongoose.Schema({
+//   date: { type: Date, default: Date.now },
+//   members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Assuming User model exists
+//   accountNumber: String,
+//   amount: Number,
+//   debitCreditOption: { type: String, enum: ['debit', 'credit'] }, // Transaction type: debit or credit
+//   transactionType: String, // Additional transaction type details
+//   status: { type: String, enum: ['pending', 'completed', 'cancelled'] }, // Transaction status
+//   description: String,
+// },{collection: 'transactions'});
 
-const transactionSchema = new mongoose.Schema({
-  date: { type: Date, default: Date.now },
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Assuming User model exists
-  accountNumber: String,
-  amount: Number,
-  debitCreditOption: { type: String, enum: ['debit', 'credit'] }, // Transaction type: debit or credit
-  transactionType: String, // Additional transaction type details
-  status: { type: String, enum: ['pending', 'completed', 'cancelled'] }, // Transaction status
-  description: String,
-},{collection: 'transactions'});
-
-const accountSchema = new mongoose.Schema({ 
-  accountNumber: { type: String, required: true, unique: true }, 
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
-  accountType: { type: String, enum: ['savings', 'checking', 'loan', 'credit'], required: true }, 
-  balance: { type: Number, default: 0 }, 
-  currency: { type: String, default: 'USD' }, 
-  status: { type: String, enum: ['active', 'inactive'], 
-  default: 'active' }, 
-  transactions: [{ type: mongoose.Schema.Types.ObjectId, 
-  ref: 'Transaction' }] 
-},{collection:'accounts'});
+// const accountSchema = new mongoose.Schema({ 
+//   accountNumber: { type: String, required: true, unique: true }, 
+//   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
+//   accountType: { type: String, enum: ['savings', 'checking', 'loan', 'credit'], required: true }, 
+//   balance: { type: Number, default: 0 }, 
+//   currency: { type: String, default: 'USD' }, 
+//   status: { type: String, enum: ['active', 'inactive'], 
+//   default: 'active' }, 
+//   transactions: [{ type: mongoose.Schema.Types.ObjectId, 
+//   ref: 'Transaction' }] 
+// },{collection:'accounts'});
 
 const branchesSchema = new mongoose.Schema({
   branchName: {type:String,required:true,unique:true},
   contactemail: {type:String,required:true,unique:true},
   contactphone: {type: String,required:true,unique:true},
+  branchaddress: {type: String,required:true},
 },{collection: 'branches'})
 
-
-const expenseSchema = new mongoose.Schema({
-  category: { type: String, required: true }, // Expense category (e.g., 'Utilities', 'Office Supplies', etc.)
-  amount: { type: Number, required: true }, // Expense amount
-  date: { type: Date, default: Date.now }, // Date of the expense
-  description: { type: String }, // Description of the expense
-  referenceID: {
-    type: mongoose.Schema.Types.ObjectId, // Reference to the related document (e.g., loan, transaction, etc.)
-    required: true
-  },
-},{collection: 'expenses'});
+// const expenseSchema = new mongoose.Schema({
+//   category: { type: String, required: true }, // Expense category (e.g., 'Utilities', 'Office Supplies', etc.)
+//   amount: { type: Number, required: true }, // Expense amount
+//   date: { type: Date, default: Date.now }, // Date of the expense
+//   description: { type: String }, // Description of the expense
+//   referenceID: {
+//     type: mongoose.Schema.Types.ObjectId, // Reference to the related document (e.g., loan, transaction, etc.)
+//     required: true
+//   },
+// },{collection: 'expenses'});
 
 const userModel = mongoose.model('userdata', userSchema);
-const loanModel = mongoose.model('loans',loanSchema);
-const transactionModel = mongoose.model('transactions',transactionSchema);
-const accountsModel = mongoose.model('accounts',accountSchema);
+// const loanModel = mongoose.model('loans',loanSchema);
+// const transactionModel = mongoose.model('transactions',transactionSchema);
+// const accountsModel = mongoose.model('accounts',accountSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
-const ExpenseModel = mongoose.model('expenses', expenseSchema);
+// const ExpenseModel = mongoose.model('expenses', expenseSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -129,23 +138,10 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
 });
 
-// Create Function
+// Create Function for User
 app.post('/create', limiter, async (req, res) => {
     const {
-      firstName,
-      lastName,
-      businessName,
-      email,
-      branch,
-      countryCode,
-      mobile,
-      password,
-      gender,
-      city,
-      state,
-      zipCode,
-      address,
-      creditSource,
+      firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,
     } = req.body;
 
     let role = 'user';
@@ -157,22 +153,7 @@ app.post('/create', limiter, async (req, res) => {
     }
 
     try {
-      const newUser = new userModel({
-        firstName,
-        lastName,
-        businessName,
-        email,
-        branch,
-        countryCode,
-        mobile,
-        password,
-        gender,
-        city,
-        state,
-        zipCode,
-        address,
-        creditSource,
-        role,
+      const newUser = new userModel({firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,role,
       });
   
       await newUser.save();
@@ -203,6 +184,7 @@ app.post('/login', limiter, async (req, res) => {
     const payload = {
       userId: user._id,
       email: user.email,
+      username: user.firstName,
       // Add other necessary user information to the payload
     };
 
@@ -285,6 +267,48 @@ try {
 }
 });
 
+// Endpoint to handle the incoming POST request with the token
+app.post('/usernamedata', (req, res) => {
+  const { token } = req.body;
+  // Check if the token exists
+  if (!token) {
+    return res.status(401).json({ error: 'Token is missing' });
+  }
+
+  try {
+    // Verify and decode the token to extract the username
+    const decoded = jwt.verify(token, 'yourSecretKey');
+
+    // Extract the username from the decoded token payload
+    const { username } = decoded;
+
+    // Send the decoded username back to the client
+    res.json({ username });
+  } catch (err) {
+    // Handle token verification or decoding errors
+    console.error('Token verification error:', err);
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+});
+
+// Create Function for Account
+app.post('/createaccount', limiter, async (req, res) => {
+  const {
+    firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,
+  } = req.body;
+
+  try {
+    const newUser = new userModel({firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,role,
+    });
+
+    await newUser.save();
+
+    res.status(200).json({ message: 'User data saved to MongoDB', data: newUser });
+  } catch (error) {
+    console.error('Error saving user data:', error);
+    res.status(500).json({ message: 'Error saving user data' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
