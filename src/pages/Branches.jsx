@@ -4,6 +4,7 @@ import { Modal, Button, Form, Table, Alert, InputGroup, FormControl } from 'reac
 
 const Branches = () => {
   const [showModal, setShowModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [formData, setFormData] = useState({ branchName: '', contactemail: '', contactphone: '', branchaddress: '' });
   const [membersData, setMembersData] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
@@ -21,6 +22,15 @@ const Branches = () => {
   };
 
   const handleCloseModal = () => setShowModal(false);
+
+  const handleEdit = (index) => {
+    // Set form data for editing
+    setFormData(filteredMembers[index]);
+    // Set the selected member index
+    setSelectedMemberIndex(index);
+    // Open the modal for editing
+    setShowUpdateModal(true);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -60,26 +70,29 @@ const Branches = () => {
     }
   };
 
-  const handleEdit = (index) => {
-    // Set form data for editing
-    setFormData(membersData[index]);
-    // Set the selected member index
-    setSelectedMemberIndex(index);
-    // Open the modal for editing
-    handleOpenModal();
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.post(`http://localhost:3001/deletebranch/${id}`);
+      if (response.data.success) {
+        // Update the frontend display after successful deletion
+        setFilteredMembers(prevMembers => prevMembers.filter(member => member.id !== id));
+  
+        // Show success alert for delete
+        setAlertVariant('success');
+        setShowAlert(true);
+      } else {
+        // Handle cases where the deletion was not successful
+        setAlertVariant('danger');
+        setShowAlert(true);
+      }
+    } catch (error) {
+      console.error('Error deleting branch:', error);
+      // Handle error scenarios
+      setAlertVariant('danger');
+      setShowAlert(true);
+    }
   };
-
-  const handleDelete = (index) => {
-    // Delete member
-    const updatedMembers = [...membersData];
-    updatedMembers.splice(index, 1);
-    setMembersData(updatedMembers);
-
-    // Show success alert for delete
-    setAlertVariant('success');
-    setShowAlert(true);
-  };
-
+    
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
