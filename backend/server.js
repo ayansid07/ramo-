@@ -96,7 +96,7 @@ const userSchema = new mongoose.Schema({
 const branchesSchema = new mongoose.Schema({
   branchName: {type:String,required:true,unique:true},
   contactemail: {type:String,required:true,unique:true},
-  contactphone: {type: String,required:true,unique:true},
+  contactphone: {type: Number,required:true,unique:true},
   branchaddress: {type: String,required:true},
 },{collection: 'branches'})
 
@@ -292,14 +292,13 @@ app.post('/usernamedata', (req, res) => {
 });
 
 // Create Function for Account
-app.post('/createaccount', limiter, async (req, res) => {
+app.post('/createbranch', limiter, async (req, res) => {
   const {
-    firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,
+    branchName,contactemail,contactphone,branchaddress
   } = req.body;
 
   try {
-    const newUser = new userModel({firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,role,
-    });
+    const newUser = new branchesModel({branchName,contactemail,contactphone,branchaddress});
 
     await newUser.save();
 
@@ -307,6 +306,56 @@ app.post('/createaccount', limiter, async (req, res) => {
   } catch (error) {
     console.error('Error saving user data:', error);
     res.status(500).json({ message: 'Error saving user data' });
+  }
+});
+
+app.put('/updatebranch/:id', limiter, async (req, res) => {
+  const branchId = req.params.id;
+  const { branchName, contactemail, contactphone, branchaddress } = req.body;
+
+  try {
+    const updatedBranch = await branchesModel.findByIdAndUpdate(
+      branchId,
+      { branchName, contactemail, contactphone, branchaddress },
+      { new: true }
+    );
+
+    if (!updatedBranch) {
+      return res.status(404).json({ message: 'Branch not found' });
+    }
+
+    res.status(200).json({ message: 'Branch updated successfully', data: updatedBranch });
+  } catch (error) {
+    console.error('Error updating branch:', error);
+    res.status(500).json({ message: 'Error updating branch' });
+  }
+});
+
+app.delete('/deletebranch/:id', limiter, async (req, res) => {
+  const branchId = req.params.id;
+
+  try {
+    const deletedBranch = await branchesModel.findByIdAndDelete(branchId);
+
+    if (!deletedBranch) {
+      return res.status(404).json({ message: 'Branch not found' });
+    }
+
+    res.status(200).json({ message: 'Branch deleted successfully', data: deletedBranch });
+  } catch (error) {
+    console.error('Error deleting branch:', error);
+    res.status(500).json({ message: 'Error deleting branch' });
+  }
+});
+
+app.get('/readbranch', limiter, async (req, res) => {
+  try {
+    const allBranches = await branchesModel.find();
+
+    res.status(200).json({ message: 'All branches retrieved successfully', data: allBranches });
+  } catch (error) {
+    console.error('Error retrieving branches:', error);
+    res.status(500).json({ message: 'Error retrieving branches' });
   }
 });
 
