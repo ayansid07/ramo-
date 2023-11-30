@@ -23,6 +23,11 @@ import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 
 const App = () => {
+  // For Direct to Dashboard
+  // const [authenticated,setAuthenticated] = useState(false);
+  // setAuthenticated(true);
+
+  // For Password based System
   const [authenticated, setAuthenticated] = useState(false);
     // Production Code
     useEffect(() => {
