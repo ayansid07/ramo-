@@ -70,7 +70,6 @@ const loanSchema = new mongoose.Schema({
   }]
 }, { collection: 'loans' });
 
-
 const transactionSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Assuming User model exists
@@ -99,7 +98,6 @@ const branchesSchema = new mongoose.Schema({
   contactemail: {type:String,required:true,unique:true},
   contactphone: {type: String,required:true,unique:true},
 },{collection: 'branches'})
-
 
 const expenseSchema = new mongoose.Schema({
   category: { type: String, required: true }, // Expense category (e.g., 'Utilities', 'Office Supplies', etc.)
@@ -139,7 +137,7 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
 });
 
-// Create Function
+// Create Function for User
 app.post('/create', limiter, async (req, res) => {
     const {
       firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,
@@ -289,6 +287,25 @@ app.post('/usernamedata', (req, res) => {
     // Handle token verification or decoding errors
     console.error('Token verification error:', err);
     res.status(401).json({ error: 'Unauthorized' });
+  }
+});
+
+// Create Function for Account
+app.post('/createaccount', limiter, async (req, res) => {
+  const {
+    firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,
+  } = req.body;
+
+  try {
+    const newUser = new userModel({firstName,lastName,businessName,email,branch,countryCode,mobile,password,gender,city,state,zipCode,address,creditSource,role,
+    });
+
+    await newUser.save();
+
+    res.status(200).json({ message: 'User data saved to MongoDB', data: newUser });
+  } catch (error) {
+    console.error('Error saving user data:', error);
+    res.status(500).json({ message: 'Error saving user data' });
   }
 });
 

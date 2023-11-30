@@ -3,6 +3,7 @@ import { AiOutlineMenu } from 'react-icons/ai';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 import avatar from '../data/avatar.jpg';
+import { IoLogOut } from "react-icons/io5";
 import { Cart, Chat, Notification, UserProfile } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
 
@@ -102,8 +103,9 @@ const Navbar = () => {
             <MdKeyboardArrowDown className="text-gray-400 text-14" />
           </div>
         </TooltipComponent>
+        <NavButton title="Logout" icon={<IoLogOut />} customFunc={handleLogout}/>
 
-        {isClicked.userProfile && (<UserProfile />)}
+        {/* {isClicked.userProfile && (<UserProfile />)} */}
       </div>
     </div>
   );
