@@ -22,7 +22,14 @@ import {
   BsCurrencyDollar,
   BsShield,
   BsChatLeft,
+  BsFillPeopleFill
 } from "react-icons/bs";
+import { GiReceiveMoney, GiPayMoney,GiMoneyStack,GiTakeMyMoney,GiExpense } from "react-icons/gi";
+import { MdAccountBalance } from "react-icons/md";
+import { GoReport } from "react-icons/go";
+
+import { GrTransaction } from "react-icons/gr";
+import { FaUser } from "react-icons/fa";
 import { BiColorFill } from "react-icons/bi";
 import { IoMdContacts } from "react-icons/io";
 import { RiContactsLine, RiStockLine } from "react-icons/ri";
@@ -31,6 +38,7 @@ import { HiOutlineRefresh } from "react-icons/hi";
 import { TiTick } from "react-icons/ti";
 import { GiLouvrePyramid } from "react-icons/gi";
 import { GrLocation } from "react-icons/gr";
+import { IoMdSettings } from "react-icons/io";
 import avatar from "./avatar.jpg";
 import avatar2 from "./avatar2.jpg";
 import avatar3 from "./avatar3.png";
@@ -43,6 +51,75 @@ import product5 from "./product5.jpg";
 import product6 from "./product6.jpg";
 import product7 from "./product7.jpg";
 import product8 from "./product8.jpg";
+
+
+
+export const links = [
+  {
+    title: "Dashboard",
+    links: [
+      {
+        name: "Branches",
+        icon: <FiShoppingBag />,
+      },
+    ],
+  },
+
+  {
+    title: "Pages",
+    links: [
+      {
+        name: "Members",
+        icon: <BsFillPeopleFill />,
+      },
+      {
+        name: "Loans",
+        icon: <GiReceiveMoney />,
+      },
+      {
+        name: "Repayments",
+        icon: <GiPayMoney />,
+      },
+      {
+        name: "Accounts",
+        icon: <MdAccountBalance />,
+      },
+      {
+        name: "Deposit",
+        icon: <GiMoneyStack />,
+      },
+      {
+        name: "Withdraw",
+        icon: <GiTakeMyMoney />,
+      },
+      {
+        name: "Transaction",
+        icon: <GrTransaction />,
+      },
+      {
+        name: "Expense",
+        icon: <GiExpense />,
+      },
+      
+      {
+        name: "User",
+        icon: <FaUser />,
+      },
+      {
+        name: "Reports",
+        icon: <GoReport />,
+      },
+      {
+        name: "System Settings",
+        icon: <IoMdSettings />,
+      },
+    ],
+  },
+  
+];
+
+
+
 
 export const gridOrderImage = (props) => (
   <div>
@@ -508,82 +585,6 @@ export const employeesGrid = [
     textAlign: "Center",
   },
 ];
-
-export const links = [
-  {
-    title: "Dashboard",
-    links: [
-      {
-        name: "Branches",
-        icon: <FiShoppingBag />,
-      },
-    ],
-  },
-
-  {
-    title: "Pages",
-    links: [
-      {
-        name: "Members",
-        icon: <AiOutlineShoppingCart />,
-      },
-      {
-        name: "Loans",
-        icon: <IoMdContacts />,
-      },
-      {
-        name: "Repayments",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Accounts",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Deposit",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Withdraw",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Transaction",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Expense",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Transaction",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Deposit Methods",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Withdraw Methods",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "User Management",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "Reports",
-        icon: <RiContactsLine />,
-      },
-      {
-        name: "System Settings",
-        icon: <RiContactsLine />,
-      },
-    ],
-  },
-  
-];
-
 
 export const cartData = [
   {
