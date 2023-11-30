@@ -23,7 +23,7 @@ import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 
 const App = () => {
-  const [authenticated, setAuthenticated] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
   // Development Code
   // setAuthenticated(true);
 
