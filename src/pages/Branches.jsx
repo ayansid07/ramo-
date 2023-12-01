@@ -23,11 +23,20 @@ const Branches = () => {
 
   const handleCloseModal = () => setShowModal(false);
 
-  const handleOpenEditModal = (id) => {
-    console.log(id);
-    setShowEditModal(true);
+  const handleOpenEditModal = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:3001/getbranch/${id}`);
+      const selectedMemberData = response.data; // Assuming response.data contains the member data
+      console.log(selectedMemberData);
+      // Set the form data to the retrieved member's data
+      setFormData(selectedMemberData);
+      setShowEditModal(true); // Open the edit modal
+    } catch (error) {
+      console.error('Error fetching member data:', error);
+      // Handle error or display an error message to the user
+    }
   };
-
+  
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setSelectedMemberIndex(null);
@@ -81,10 +90,12 @@ const Branches = () => {
     }, 500);
   };
 
-  const handleUpdate = async (id) => {
+  const handleUpdate = async (e,id) => {
+    e.preventDefault()
     console.log(id);
     try {
       // Update member
+      console.log(formData);
       const response = await axios.put(`http://localhost:3001/updatebranch/${formData._id}`, formData);
       console.log(response.data);
 

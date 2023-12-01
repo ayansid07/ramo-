@@ -368,6 +368,26 @@ app.get('/readbranch', limiter, async (req, res) => {
   }
 });
 
+// GET branch by ID
+app.get('/getbranch/:id', async (req, res) => {
+  const branchId = req.params.id;
+
+  try {
+    // Find the branch by ID in your MongoDB database using Mongoose
+    const branch = await branchesModel.findById(branchId);
+
+    if (!branch) {
+      return res.status(404).json({ message: 'Branch not found' });
+    }
+
+    // If the branch is found, send it as a response
+    res.status(200).json(branch);
+  } catch (error) {
+    console.error('Error retrieving branch:', error);
+    res.status(500).json({ message: 'Error retrieving branch' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
