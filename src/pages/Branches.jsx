@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
+import axios from 'axios';
 import { Modal, Button, Form, Table, Alert, InputGroup, FormControl } from 'react-bootstrap';
 
 const Branches = () => {
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', address: '' });
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [formData, setFormData] = useState({ branchName: '', contactemail: '', contactphone: '', branchaddress: '' });
   const [membersData, setMembersData] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertVariant, setAlertVariant] = useState('success'); // or 'danger' for an error alert
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMemberIndex, setSelectedMemberIndex] = useState(null);
+  const [filteredMembers, setFilteredMembers] = useState([]); // State to hold filtered members
 
   const handleOpenModal = () => {
     setShowModal(true);
@@ -20,6 +23,16 @@ const Branches = () => {
 
   const handleCloseModal = () => setShowModal(false);
 
+  const handleOpenEditModal = (id) => {
+    console.log(id);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setSelectedMemberIndex(null);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -28,7 +41,7 @@ const Branches = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Check if it's an update or add operation
@@ -44,14 +57,23 @@ const Branches = () => {
     } else {
       // Add new member
       setMembersData((prevData) => [...prevData, formData]);
-
-      // Show success alert for add
-      setAlertVariant('success');
-      setShowAlert(true);
+      // Axios Create request here for posting data (Posting Correctly)
+      console.log(formData);
+      try {      
+        const response =  await axios.post('http://localhost:3001/createbranch',formData);
+        console.log('Data Successfully entered in Backend Server',formData);
+        // Show success alert for add
+        setAlertVariant('success');
+        setShowAlert(true);      
+      } catch (error) {
+        console.log('Some Error in submitting the form data to backend');
+        setAlertVariant('failed');
+        setShowAlert(true);
+      }
     }
 
     // Reset form data
-    setFormData({ name: '', email: '', phone: '', address: '' });
+    setFormData({ branchName: '', email: '', phone: '', address: '' });
 
     // Close modal after a delay (you can adjust the delay as needed)
     setTimeout(() => {
@@ -59,20 +81,36 @@ const Branches = () => {
     }, 500);
   };
 
-  const handleEdit = (index) => {
-    // Set form data for editing
-    setFormData(membersData[index]);
-    // Set the selected member index
-    setSelectedMemberIndex(index);
-    // Open the modal for editing
-    handleOpenModal();
+  const handleUpdate = async (id) => {
+    console.log(id);
+    try {
+      // Update member
+      const response = await axios.put(`http://localhost:3001/updatebranch/${formData._id}`, formData);
+      console.log(response.data);
+
+      // Show success alert for update
+      setAlertVariant('success');
+      setShowAlert(true);
+
+      // Close the edit modal
+      handleCloseEditModal();
+    } catch (error) {
+      console.error('Error updating data:', error);
+      // Show failure alert for update
+      setAlertVariant('failed');
+      setShowAlert(true);
+    }
   };
 
-  const handleDelete = (index) => {
-    // Delete member
-    const updatedMembers = [...membersData];
-    updatedMembers.splice(index, 1);
-    setMembersData(updatedMembers);
+  const handleDelete = async (id) => {
+    // Delete member from table
+    try {
+      console.log(id);
+      const response = await axios.post('http://localhost:3001/deletebranch/',{id});
+      console.log(response);
+    } catch (error){
+      console.log('Error in deleting data');
+    }
 
     // Show success alert for delete
     setAlertVariant('success');
@@ -83,9 +121,35 @@ const Branches = () => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredMembers = membersData.filter((member) =>
-    member.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/readbranch');
+        const { data } = response.data; // Extract 'data' array from the response
+
+        // Filter the 'data' array based on searchTerm
+        const filteredData = data.filter((member) =>
+          member.branchName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        // Update filteredMembers state with the filtered data
+        setFilteredMembers(filteredData);
+      } catch (error) {
+        console.error('Error while fetching data:', error);
+        // Handle the error or show an error message to the user
+      }
+    };
+
+    fetchData(); // Call fetchData initially when the component mounts
+
+    const interval = setInterval(() => {
+      fetchData(); // Fetch data every 10 seconds
+    }, 20000);
+
+    return () => {
+      clearInterval(interval); // Clean up the interval on component unmount
+    };
+  }, [searchTerm]);
 
   return (
     <div className='body-div'>
@@ -123,8 +187,8 @@ const Branches = () => {
               <Form.Control
                 type="text"
                 placeholder="Enter name"
-                name="name"
-                value={formData.name}
+                name="branchName"
+                value={formData.branchName}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -133,8 +197,8 @@ const Branches = () => {
               <Form.Control
                 type="email"
                 placeholder="Enter email"
-                name="email"
-                value={formData.email}
+                name="contactemail"
+                value={formData.contactemail}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -143,8 +207,8 @@ const Branches = () => {
               <Form.Control
                 type="number"
                 placeholder="Enter phone number"
-                name="phone"
-                value={formData.phone}
+                name="contactphone"
+                value={formData.contactphone}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -153,14 +217,76 @@ const Branches = () => {
               <Form.Control
                 type="textarea"
                 placeholder="Enter address"
-                name="address"
-                value={formData.address}
+                name="branchaddress"
+                value={formData.branchaddress}
                 onChange={handleInputChange}
               />
             </Form.Group>
             <Button variant="primary" type="submit">
               {selectedMemberIndex !== null ? 'Edit' : 'Add'}
             </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+      
+      {/* Edit Branch Modal */}
+      <Modal show={showEditModal} onHide={handleCloseEditModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Branch</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleUpdate}>
+          <Form.Group controlId="formID">
+            <Form.Label>ID</Form.Label>
+            <Form.Control 
+              type="integer"
+              placeholder='Enter Id'
+              name='branchId'
+              value={formData.branchId}
+              onChange={handleInputChange}
+            />
+          </Form.Group>
+          <Form.Group controlId="formName">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter name"
+                name="branchName"
+                value={formData.branchName}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmail">
+              <Form.Label>Email </Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter email"
+                name="contactemail"
+                value={formData.contactemail}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formPhone">
+              <Form.Label>Phone </Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter phone number"
+                name="contactphone"
+                value={formData.contactphone}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formAddress">
+              <Form.Label> Address</Form.Label>
+              <Form.Control
+                type="textarea"
+                placeholder="Enter address"
+                name="branchaddress"
+                value={formData.branchaddress}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit">Update</Button>
           </Form>
         </Modal.Body>
       </Modal>
@@ -172,6 +298,7 @@ const Branches = () => {
       <Table striped bordered hover className="mt-4">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>
@@ -180,17 +307,18 @@ const Branches = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredMembers.map((member, index) => (
-            <tr key={index}>
-              <td>{member.name}</td>
-              <td>{member.email}</td>
-              <td>{member.phone}</td>
-              <td>{member.address}</td>
+          {filteredMembers.map((member) => (
+            <tr>
+              <td>{member._id}</td>
+              <td>{member.branchName}</td>
+              <td>{member.contactemail}</td>
+              <td>{member.contactphone}</td>
+              <td>{member.branchaddress}</td>
               <td>
-                <Button variant="warning" onClick={() => handleEdit(index)}>
+                <Button variant="warning" onClick={() => handleOpenEditModal(member._id)}>
                   Edit
                 </Button>{' '}
-                <Button variant="danger" onClick={() => handleDelete(index)}>
+                <Button variant="Deleted Succcessfully" onClick={() => handleDelete(member._id)}>
                   Delete
                 </Button>
               </td>
