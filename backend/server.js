@@ -342,7 +342,6 @@ app.put('/updatebranch/:id', limiter, async (req, res) => {
 
 app.post('/deletebranch/:id', limiter, async (req, res) => {
   const branchId = req.params.id;
-  console.log(branchId);
   try {
     const deletedBranch = await branchesModel.findByIdAndDelete(branchId);
 

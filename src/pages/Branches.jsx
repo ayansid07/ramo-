@@ -29,7 +29,11 @@ const Branches = () => {
       const selectedMemberData = response.data; // Assuming response.data contains the member data
       console.log(selectedMemberData);
       // Set the form data to the retrieved member's data
-      setFormData(selectedMemberData);
+      // Set the form data to the retrieved member's data
+      setFormData({
+        ...selectedMemberData,
+        branchId: selectedMemberData._id // Assigning the ID to the correct field in the form
+      });      
       setShowEditModal(true); // Open the edit modal
     } catch (error) {
       console.error('Error fetching member data:', error);
@@ -114,20 +118,22 @@ const Branches = () => {
   };
 
   const handleDelete = async (id) => {
-    // Delete member from table
     try {
-      console.log(id);
-      const response = await axios.post('http://localhost:3001/deletebranch/',{id});
-      console.log(response);
-    } catch (error){
-      console.log('Error in deleting data');
+      const response = await axios.post(`http://localhost:3001/deletebranch/${id}`);
+      console.log(response.data);
+  
+      // Show success alert for delete
+      setAlertVariant('success');
+      setShowAlert(true);
+    } catch (error) {
+      console.error('Error in deleting data:', error);
+  
+      // Show error alert for delete
+      setAlertVariant('failed');
+      setShowAlert(true);
     }
-
-    // Show success alert for delete
-    setAlertVariant('success');
-    setShowAlert(true);
   };
-
+  
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -155,7 +161,7 @@ const Branches = () => {
 
     const interval = setInterval(() => {
       fetchData(); // Fetch data every 10 seconds
-    }, 20000);
+    }, 10000);
 
     return () => {
       clearInterval(interval); // Clean up the interval on component unmount
