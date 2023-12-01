@@ -100,6 +100,14 @@ const branchesSchema = new mongoose.Schema({
   branchaddress: {type: String,required:true},
 },{collection: 'branches'})
 
+const memberSchema = new mongoose.Schema({
+  memberNo : {type:Number,required:true,unique:true},
+  firstName: {type:String,required:true},
+  lastName: {type:String,required:true},
+  email: {type:String,required:true,unique:true},
+  branchName: {type:String,requires:true},
+},{collection:'members'})
+
 // const expenseSchema = new mongoose.Schema({
 //   category: { type: String, required: true }, // Expense category (e.g., 'Utilities', 'Office Supplies', etc.)
 //   amount: { type: Number, required: true }, // Expense amount
@@ -117,6 +125,7 @@ const userModel = mongoose.model('userdata', userSchema);
 // const accountsModel = mongoose.model('accounts',accountSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
 // const ExpenseModel = mongoose.model('expenses', expenseSchema);
+const memberModel = mongoose.model('members',memberSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -356,6 +365,52 @@ app.get('/readbranch', limiter, async (req, res) => {
   } catch (error) {
     console.error('Error retrieving branches:', error);
     res.status(500).json({ message: 'Error retrieving branches' });
+  }
+});
+
+app.get('/getmembers', limiter, async (req, res) => {
+  try {
+    const allmembers = await memberModel.find();
+
+    res.status(200).json({ message: 'All Members retrieved successfully', data: allmembers });
+  } catch (error) {
+    console.error('Error retrieving branches:', error);
+    res.status(500).json({ message: 'Error retrieving branches' });
+  }
+});
+
+// Create Function for Account
+app.post('/createmember', limiter, async (req, res) => {
+  const {
+    memberNo,firstName,lastName,email,branchName
+  } = req.body;
+
+  try {
+    const newUser = new memberModel({memberNo,firstName,lastName,email,branchName});
+
+    await newUser.save();
+
+    res.status(200).json({ message: 'User data saved to MongoDB', data: newUser });
+  } catch (error) {
+    console.error('Error saving user data:', error);
+    res.status(500).json({ message: 'Error saving user data' });
+  }
+});
+
+app.post('/deletemember/:id', limiter, async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const deletedBranch = await memberModel.findByIdAndDelete(id);
+
+    if (!deletedBranch) {
+      return res.status(404).json({ message: 'Branch not found' });
+    }
+
+    res.status(200).json({ message: 'Member deleted successfully', data: deletedBranch });
+  } catch (error) {
+    console.error('Error deleting branch:', error);
+    res.status(500).json({ message: 'Error deleting branch' });
   }
 });
 
