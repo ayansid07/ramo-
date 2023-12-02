@@ -36,7 +36,7 @@ const App = () => {
   // setAuthenticated(true);
 
   // For Password based System
-  const [authenticated, setAuthenticated] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
     // Production Code
     useEffect(() => {
       // Check if a valid token exists in local storage

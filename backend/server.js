@@ -77,11 +77,20 @@ const RepaymentSchema = new mongoose.Schema({
   totalAmount: {type:Number,required:true},
 },{collection:'repayments'});
 
+const AccountSchema = new mongoose.Schema({
+  accountNumber: { type: String, required: true, unique: true },
+  member: { type: String, required: true },
+  accountType: { type: String, required: true },
+  status: { type: String, required: true },
+  openingBalance: { type: Number, required: true }
+},{collection:'accounts'});
+
 const userModel = mongoose.model('userdata', userSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
 const memberModel = mongoose.model('members',memberSchema);
 const loansModel = mongoose.model('loans',loanSchema);
 const repaymentModel= mongoose.model('repayments',RepaymentSchema);
+const AccountModel = mongoose.model('accounts',AccountSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -645,6 +654,65 @@ app.get('/approvedLoans', async (req, res) => {
   } catch (error) {
     console.error('Error fetching approved loans:', error);
     res.status(500).json({ message: 'Error fetching approved loans' });
+  }
+});
+
+// Create a new account
+app.post('/accounts', async (req, res) => {
+  try {
+    const account = await Account.create(req.body);
+    res.status(201).json(account);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get all accounts
+app.get('/accounts', async (req, res) => {
+  try {
+    const accounts = await Account.find();
+    res.json(accounts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get an account by ID
+app.get('/accounts/:id', async (req, res) => {
+  try {
+    const account = await Account.findById(req.params.id);
+    if (!account) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    res.json(account);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update an account by ID
+app.put('/accounts/:id', async (req, res) => {
+  try {
+    const account = await Account.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!account) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    res.json(account);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Delete an account by ID
+app.delete('/accounts/:id', async (req, res) => {
+  try {
+    const account = await Account.findByIdAndDelete(req.params.id);
+    if (!account) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    res.json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
