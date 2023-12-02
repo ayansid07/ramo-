@@ -42,57 +42,6 @@ const userSchema = new mongoose.Schema({
   role: {type: String,required: true,},
 },{collection: 'userdata'});
 
-// const loanSchema = new mongoose.Schema({
-//   borrowerName: { type: String, required: true },
-//   amount: { type: Number, required: true },
-//   CustomerID: { type: Number, required: true },
-//   email: {type: String,required: true,unique: true,},
-//   ProjectName: { type: String },
-//   Status: { type: String, enum: ['Active', 'Inactive', 'Cancel'], default: 'Active' },
-//   CustomerImage: { type: String },
-//   StatusBg: { type: String },
-//   Weeks: { type: String },
-//   Budget: { type: String },
-//   Location: { type: String },
-//   interestRate: { type: Number, required: true },
-//   startDate: { type: Date, required: true },
-//   endDate: { type: Date, required: true },
-//   status: { type: String, enum: ['Pending', 'Active', 'Closed', 'Defaulted', 'Cancelled'], default: 'Pending' },
-//   collateral: { type: String },
-//   purpose: { type: String },
-//   repayments: [{
-//     amountPaid: { type: Number, required: true },
-//     datePaid: { type: Date, default: Date.now },
-//     paymentMode: { type: String },
-//     paymentReference: { type: String },
-//     paymentStatus: { type: String }
-//     // Add more fields as needed for repayments
-//   }]
-// }, { collection: 'loans' });
-
-// const transactionSchema = new mongoose.Schema({
-//   date: { type: Date, default: Date.now },
-//   members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Assuming User model exists
-//   accountNumber: String,
-//   amount: Number,
-//   debitCreditOption: { type: String, enum: ['debit', 'credit'] }, // Transaction type: debit or credit
-//   transactionType: String, // Additional transaction type details
-//   status: { type: String, enum: ['pending', 'completed', 'cancelled'] }, // Transaction status
-//   description: String,
-// },{collection: 'transactions'});
-
-// const accountSchema = new mongoose.Schema({ 
-//   accountNumber: { type: String, required: true, unique: true }, 
-//   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
-//   accountType: { type: String, enum: ['savings', 'checking', 'loan', 'credit'], required: true }, 
-//   balance: { type: Number, default: 0 }, 
-//   currency: { type: String, default: 'USD' }, 
-//   status: { type: String, enum: ['active', 'inactive'], 
-//   default: 'active' }, 
-//   transactions: [{ type: mongoose.Schema.Types.ObjectId, 
-//   ref: 'Transaction' }] 
-// },{collection:'accounts'});
-
 const branchesSchema = new mongoose.Schema({
   branchName: {type:String,required:true,unique:true},
   contactemail: {type:String,required:true,unique:true},
@@ -108,24 +57,20 @@ const memberSchema = new mongoose.Schema({
   branchName: {type:String,requires:true},
 },{collection:'members'})
 
-// const expenseSchema = new mongoose.Schema({
-//   category: { type: String, required: true }, // Expense category (e.g., 'Utilities', 'Office Supplies', etc.)
-//   amount: { type: Number, required: true }, // Expense amount
-//   date: { type: Date, default: Date.now }, // Date of the expense
-//   description: { type: String }, // Description of the expense
-//   referenceID: {
-//     type: mongoose.Schema.Types.ObjectId, // Reference to the related document (e.g., loan, transaction, etc.)
-//     required: true
-//   },
-// },{collection: 'expenses'});
+const loanSchema = new mongoose.Schema({
+  loanId: { type: String, required: true, unique: true },
+  loanProduct: { type: String, required: true },
+  borrower: { type: String, required: true },
+  memberNo: { type: Number, required: true },
+  releaseDate: { type: Date, required: true },
+  appliedAmount: { type: Number, required: true },
+  status: { type: String, required: true },
+},{collection: 'loans'});
 
 const userModel = mongoose.model('userdata', userSchema);
-// const loanModel = mongoose.model('loans',loanSchema);
-// const transactionModel = mongoose.model('transactions',transactionSchema);
-// const accountsModel = mongoose.model('accounts',accountSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
-// const ExpenseModel = mongoose.model('expenses', expenseSchema);
 const memberModel = mongoose.model('members',memberSchema);
+const loansModel = mongoose.model('loans',loanSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -144,7 +89,7 @@ const rateLimit = require('express-rate-limit');
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 100 requests per windowMs
 });
 
 // Create Function for User
@@ -183,7 +128,7 @@ app.post('/login', limiter, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
+    // Admin Franchise agent User
     // This is not secure - comparing passwords in plaintext
     if (user.password !== password) {
       return res.status(401).json({ message: 'Invalid Password' });
@@ -490,6 +435,108 @@ app.get('/getmember/:id', async (req, res) => {
   } catch (error) {
     console.error('Error retrieving member:', error);
     res.status(500).json({ message: 'Error retrieving member' });
+  }
+});
+
+app.post('/createloan', limiter, async (req, res) => {
+  const {
+    loanId, loanProduct, borrower, memberNo, releaseDate, appliedAmount, status
+  } = req.body;
+
+  try {
+    const newLoan = new loansModel({
+      loanId,loanProduct,borrower,
+      memberNo,releaseDate,appliedAmount,
+      status,
+    });
+
+    await newLoan.save();
+
+    res.status(200).json({ message: 'Loan data saved to MongoDB', data: newLoan });
+  } catch (error) {
+    console.error('Error saving loan data:', error);
+    res.status(500).json({ message: 'Error saving loan data' });
+  }
+});
+
+app.put('/updateloan/:id', limiter, async (req, res) => {
+  const loanId = req.params.id;
+  const { loanProduct, borrower, memberNo, releaseDate, appliedAmount, status } = req.body;
+
+  try {
+    const updatedLoan = await loansModel.findByIdAndUpdate(
+      loanId,
+      { loanProduct, borrower, memberNo, releaseDate, appliedAmount, status },
+      { new: true }
+    );
+
+    if (!updatedLoan) {
+      return res.status(404).json({ message: 'Loan not found' });
+    }
+
+    res.status(200).json({ message: 'Loan updated successfully', data: updatedLoan });
+  } catch (error) {
+    console.error('Error updating loan:', error);
+    res.status(500).json({ message: 'Error updating loan' });
+  }
+});
+
+app.post('/deleteloan/:id', limiter, async (req, res) => {
+  const loanId = req.params.id;
+  try {
+    const deletedLoan = await loansModel.findByIdAndDelete(loanId);
+
+    if (!deletedLoan) {
+      return res.status(404).json({ message: 'Loan not found' });
+    }
+
+    res.status(200).json({ message: 'Loan deleted successfully', data: deletedLoan });
+  } catch (error) {
+    console.error('Error deleting loan:', error);
+    res.status(500).json({ message: 'Error deleting loan' });
+  }
+});
+
+app.get('/loans', limiter, async (req, res) => {
+  try {
+    const allLoans = await loansModel.find();
+
+    res.status(200).json({ message: 'All loans retrieved successfully', data: allLoans });
+  } catch (error) {
+    console.error('Error retrieving loans:', error);
+    res.status(500).json({ message: 'Error retrieving loans' });
+  }
+});
+
+app.get('/loans/members', limiter, async (req, res) => {
+  try {
+    const allMembers = await memberModel.find({}, { memberNo: 1, _id: 0 });
+
+    const memberNumbers = allMembers.map(member => member.memberNo);
+
+    res.status(200).json({ message: 'All member numbers retrieved successfully', data: memberNumbers });
+  } catch (error) {
+    console.error('Error retrieving member numbers:', error);
+    res.status(500).json({ message: 'Error retrieving member numbers' });
+  }
+});
+
+app.get('/loans/:id', async (req, res) => {
+  const x = req.params.id;
+
+  try {
+    // Find the loan by ID in your MongoDB database using Mongoose
+    const loan = await loansModel.findById(x);
+
+    if (!loan) {
+      return res.status(404).json({ message: 'Loan not found' });
+    }
+
+    // If the loan is found, send it as a response
+    res.status(200).json(loan);
+  } catch (error) {
+    console.error('Error retrieving loan:', error);
+    res.status(500).json({ message: 'Error retrieving loan' });
   }
 });
 
