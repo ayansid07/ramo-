@@ -315,7 +315,7 @@ const Branches = () => {
       <Table striped bordered hover className="mt-4">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>Unique Branch ID</th>
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>

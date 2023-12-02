@@ -31,8 +31,25 @@ const Members = () => {
         setBranchNames(response.data.data);
       })
       .catch(error => console.error('Error fetching branch names:', error));
-  }, []);
-  
+
+    // Fetch members data
+    axios.get('http://localhost:3001/readmembers')
+      .then(response => {
+        const { data } = response.data; // Destructure the 'data' field from the response
+
+        if (Array.isArray(data)) {
+          setMembersData(data); // If it's already an array, set it directly
+        } else if (typeof data === 'object') {
+          // If it's an object (JSON), convert it to an array
+          const dataArray = [data]; // Wrap single object in an array
+          setMembersData(dataArray);
+        } else {
+          console.error('Invalid format for members data:', data);
+        }
+      })
+      .catch(error => console.error('Error fetching members data:', error));
+    },[]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -50,6 +67,7 @@ const Members = () => {
         alert('Data Entered Successfully');
     } 
     catch (error) {
+      alert('Check Data Fields for no duplicates');
       console.error('Error:', error);
       // Handle error or display an error message to the user
     }
@@ -81,7 +99,6 @@ const Members = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
-          
             <Form.Group controlId="formMemberNo">
               <Form.Label>Member No</Form.Label>
               <Form.Control
@@ -125,8 +142,8 @@ const Members = () => {
             <Form.Group controlId="formBranch">
                 <Form.Label>Branch</Form.Label>
                 <Form.Select
-                  name="branch"
-                  value={formData.branch}
+                  name="branchName"
+                  value={formData.branchName}
                   onChange={handleInputChange}
                 >
                   <option value="">Select a branch</option>
@@ -156,13 +173,13 @@ const Members = () => {
           </tr>
         </thead>
         <tbody>
-          {membersData.map((member, index) => (
-            <tr key={index}>
+          {membersData.map((member) => (
+            <tr>
               <td>{member.memberNo}</td>
               <td>{member.firstName}</td>
               <td>{member.lastName}</td>
               <td>{member.email}</td>
-              <td>{member.branch}</td>
+              <td>{member.branchName}</td>
               <td>
                 <Button variant="warning" onClick={() => handleEdit(index)}>
                   Edit
