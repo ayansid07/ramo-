@@ -1,12 +1,14 @@
 // Repayments.jsx
 
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Modal, Button, Form, Table, FormControl } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
+import axios from 'axios';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const Repayments = () => {
   const [showModal, setShowModal] = useState(false);
+  const [approvedLoanIds, setApprovedLoanIds] = useState([]);
   const [formData, setFormData] = useState({
     loanId: '',
     paymentDate: new Date(),
@@ -17,6 +19,7 @@ const Repayments = () => {
     totalAmount: 0,
   });
   const [repaymentsData, setRepaymentsData] = useState([]);
+  const [filteredRepayments, setFilteredRepayments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleOpenModal = () => setShowModal(true);
@@ -41,18 +44,58 @@ const Repayments = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setRepaymentsData((prevData) => [...prevData, formData]);
-    handleCloseModal();
+    console.log(formData);
+    try {
+      const response = await axios.post('http://localhost:3001/createrepayments', formData);
+      console.log('Data Successfully entered in Backend Server', response.data.data);
+      // Show success alert for add
+      alert('success');
+      handleCloseModal();
+    } catch (error) {
+      console.log('Some Error in submitting the form data to backend:', error);
+      alert('failed');
+      handleCloseModal();
+    }
   };
 
-  const filteredRepayments = repaymentsData.filter((repayment) =>
-    Object.values(repayment).some(
-      (value) =>
-        typeof value === 'number' && value.toString().includes(searchTerm)
-    )
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/readrepayments');
+        setRepaymentsData(response.data.data);
+      } catch (error) {
+        console.error('Error fetching repayments:', error);
+        // Handle error or display an error message to the user
+      }
+    };
+
+    const fetchApprovedLoanIds = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/approvedLoans');
+        const data = response.data.data;
+        setApprovedLoanIds(data);
+        console.log('Approved Loan Id',data);
+      } catch (error) {
+        console.error('Error fetching approved loan IDs:', error);
+      }
+    };
+
+    fetchApprovedLoanIds();
+    fetchData(); // Fetch repayment data when the component mounts
+  }, []);
+
+  useEffect(() => {
+    const filteredRepayments = repaymentsData.filter((repayment) =>
+      Object.values(repayment).some(
+        (value) =>
+          typeof value === 'number' && value.toString().includes(searchTerm)
+      )
+    );
+
+    setFilteredRepayments(filteredRepayments);
+  }, [searchTerm, repaymentsData]);
 
   return (
     <div className='body-div'>
@@ -74,16 +117,22 @@ const Repayments = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="formLoanId">
-              <Form.Label>Loan ID</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter loan ID"
-                name="loanId"
-                value={formData.loanId}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+          <Form.Group controlId="formLoanId">
+            <Form.Label>Loan ID</Form.Label>
+            <Form.Control
+              as="select"
+              name="loanId"
+              value={formData.loanId}
+              onChange={handleInputChange}
+            >
+              <option value="">Select a Loan ID</option>
+              {approvedLoanIds.map((loan) => (
+                <option key={loan._id} value={loan.loanId}>
+                  {loan.loanId}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
             <Form.Group controlId="formPaymentDate">
               <Form.Label>Payment Date</Form.Label>
               <br />

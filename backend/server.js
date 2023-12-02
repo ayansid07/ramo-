@@ -67,10 +67,21 @@ const loanSchema = new mongoose.Schema({
   status: { type: String, required: true },
 },{collection: 'loans'});
 
+const RepaymentSchema = new mongoose.Schema({
+  loanId: { type: mongoose.Schema.Types.ObjectId,ref: 'loansModel',required: true ,unique: true},
+  paymentDate: { type: Date,required: true},
+  dueDate: {type: Date,required: true},
+  principalAmount: {type: Number,required: true},
+  interest: {type: Number,required: true},
+  latePenalties: {type: Number,required: true},
+  totalAmount: {type:Number,required:true},
+},{collection:'repayments'});
+
 const userModel = mongoose.model('userdata', userSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
 const memberModel = mongoose.model('members',memberSchema);
 const loansModel = mongoose.model('loans',loanSchema);
+const repaymentModel= mongoose.model('repayments',RepaymentSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -537,6 +548,103 @@ app.get('/loans/:id', async (req, res) => {
   } catch (error) {
     console.error('Error retrieving loan:', error);
     res.status(500).json({ message: 'Error retrieving loan' });
+  }
+});
+
+// Create a new repayment record
+app.post('/createrepayments', async (req, res) => {
+  try {
+    const {
+      loanId, paymentDate, dueDate, principalAmount, interest, latePenalties, totalAmount
+    } = req.body;
+
+    const newRepayment = new repaymentModel({
+      loanId: new mongoose.Types.ObjectId(Number(loanId)), // Assign the converted ObjectId to the 'loanId' field in the model
+      paymentDate,
+      dueDate,
+      principalAmount,
+      interest,
+      latePenalties,
+      totalAmount
+    });
+
+    const savedRepayment = await newRepayment.save();
+    res.status(201).json({ message: 'Repayment record created', data: savedRepayment });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create repayment record', error: error.message });
+  }
+});
+
+// Get all repayment records
+app.get('/readrepayments', async (req, res) => {
+  try {
+    const repayments = await repaymentModel.find();
+    res.status(200).json({ message: 'All repayment records retrieved', data: repayments });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to retrieve repayment records', error: error.message });
+  }
+});
+
+// Get a specific repayment record by ID
+app.get('/repayments/:id', async (req, res) => {
+  try {
+    const repaymentId = req.params.id;
+    const repayment = await repaymentModel.findById(repaymentId);
+    if (!repayment) {
+      return res.status(404).json({ message: 'Repayment record not found' });
+    }
+    res.status(200).json({ message: 'Repayment record retrieved', data: repayment });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to retrieve repayment record', error: error.message });
+  }
+});
+
+// Update a repayment record by ID
+app.put('/repayments/:id', async (req, res) => {
+  try {
+    const repaymentId = req.params.id;
+    const {
+      loanId, paymentDate, dueDate, principalAmount, interest, latePenalties,totalAmount
+    } = req.body;
+
+    const updatedRepayment = await repaymentModel.findByIdAndUpdate(repaymentId, {
+      loanId, paymentDate, dueDate, principalAmount, interest, latePenalties, totalAmount
+    }, { new: true });
+
+    if (!updatedRepayment) {
+      return res.status(404).json({ message: 'Repayment record not found' });
+    }
+
+    res.status(200).json({ message: 'Repayment record updated', data: updatedRepayment });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update repayment record', error: error.message });
+  }
+});
+
+// Delete a repayment record by ID
+app.delete('/repayments/:id', async (req, res) => {
+  try {
+    const repaymentId = req.params.id;
+    const deletedRepayment = await repaymentModel.findByIdAndDelete(repaymentId);
+
+    if (!deletedRepayment) {
+      return res.status(404).json({ message: 'Repayment record not found' });
+    }
+
+    res.status(200).json({ message: 'Repayment record deleted', data: deletedRepayment });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to delete repayment record', error: error.message });
+  }
+});
+
+// GET endpoint to fetch approved loan IDs
+app.get('/approvedLoans', async (req, res) => {
+  try {
+    const approvedLoans = await loansModel.find({ status: 'Approved' }, { loanId: 1, _id: 0 });
+    res.status(200).json({ message: 'Approved loans retrieved successfully', data: approvedLoans });
+  } catch (error) {
+    console.error('Error fetching approved loans:', error);
+    res.status(500).json({ message: 'Error fetching approved loans' });
   }
 });
 
