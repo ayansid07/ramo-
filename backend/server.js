@@ -93,7 +93,7 @@ const TransactionSchema = new mongoose.Schema({
   debitOrCredit: { type: String, enum: ['Debit', 'Credit'], required: true },
   status: { type: String, required: true },
   description: { type: String, required: true }
-});
+},{collection:'transactions'});
 
 const userModel = mongoose.model('userdata', userSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
@@ -101,6 +101,7 @@ const memberModel = mongoose.model('members',memberSchema);
 const loansModel = mongoose.model('loans',loanSchema);
 const repaymentModel= mongoose.model('repayments',RepaymentSchema);
 const AccountModel = mongoose.model('accounts',AccountSchema);
+const TransactionsSchema = mongoose.model('transactions',transactionsSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
