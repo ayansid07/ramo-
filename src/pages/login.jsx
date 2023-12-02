@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { Link } from 'react-router-dom';
+import { Card, Form, Button, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [rememberMe, setRememberMe] = useState(false); // State for "Remember Me" checkbox
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -19,7 +20,6 @@ const Login = () => {
 
       if (response.status === 200) {
         const token = response.data.token;
-        // Store the token in localStorage or sessionStorage
         localStorage.setItem('token', token);
         window.location.reload();
       }
@@ -33,46 +33,78 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />
-            Remember me
-          </label>
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      {message && <p>{message}</p>}
-      <div>
-        <Link to="/register">Register</Link> {/* Link to the Register page */}
-      </div>
-      <div>
-        <Link to="/forgot-password">Forgot Password?</Link> {/* Link to the Forgot Password page */}
-      </div>
+    <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+      <Card style={{ width: '600px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+        <Row>
+          {/* Left Section */}
+          <Col md={6} style={{ padding: '0', overflow: 'hidden' }}>
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundImage: 'url(https://wallpaperaccess.com/thumb/1374866.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '2rem',
+                borderTopLeftRadius: '10px',  // Round the top left corner
+                borderBottomLeftRadius: '10px',  // Round the bottom left corner
+              }}
+            >
+              Login
+            </div>
+          </Col>
+
+          {/* Right Section */}
+          <Col md={6}>
+            <Card.Body>
+              <h2 className="text-center mb-4"></h2>
+              <Form onSubmit={handleLogin}>
+                <Form.Group>
+                  <Form.Label>Email:</Form.Label>
+                  <Form.Control
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Password:</Form.Label>
+                  <Form.Control
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Check
+                    type="checkbox"
+                    label="Remember me"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                </Form.Group>
+                <Button type="submit" variant="primary" block>
+                  Login
+                </Button>
+              </Form>
+              {message && <p>{message}</p>}
+              <div>
+                <Link to="/register">Register</Link>
+              </div>
+              <div>
+                <Link to="/forgot-password">Forgot Password?</Link>
+              </div>
+            </Card.Body>
+          </Col>
+        </Row>
+      </Card>
     </div>
   );
 };
