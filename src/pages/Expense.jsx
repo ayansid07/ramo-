@@ -70,10 +70,12 @@ const Expense = () => {
 
   return (
     <div className='body-div'>
+      <div style={{marginBottom:'3px'}}>
       <Button variant="primary" onClick={handleModalShow}>
         Add Expense
       </Button>  
-  
+      </div>
+      <br/>
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>Add Expense</Modal.Title>

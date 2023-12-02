@@ -56,8 +56,12 @@ import product8 from "./product8.jpg";
 
 export const links = [
   {
-    title: "Dashboard",
+    
     links: [
+      {
+        name: "Dashboard",
+        icon: <FiShoppingBag />,
+      },
       {
         name: "Branches",
         icon: <FiShoppingBag />,

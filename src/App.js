@@ -8,19 +8,27 @@ import Members  from "./pages/Members";
 import Accounts  from "./pages/Accounts";
 import Repayments  from "./pages/Repayments";
 import Loans  from "./pages/Loans";
-import Login from './pages/login';
-import Register from './pages/register';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import Deposit  from "./pages/Deposit";
 import Dashboard from './pages/Dashboard'
 import Withdraw  from "./pages/Withdraw";
 import Transaction  from "./pages/Transaction";
 import Expense  from "./pages/Expense";
 import User  from "./pages/User";
+import Reports from "./pages/Reports";
 import { Navbar, Footer, Sidebar, ThemeSettings } from './components';
 import './App.css';
-
-
 import { useStateContext } from './contexts/ContextProvider';
+import Accountstatement from './pages/reports/Accountstatement';
+import Accountbalance from './pages/reports/Accountbalance';
+import Loanreport from './pages/reports/Loanreport';
+import Loandue from './pages/reports/Loandue';
+import TransactionReport from './pages/reports/Transaction';
+import ExpenseReport from './pages/reports/Expense';
+import RevenueReport from './pages/reports/Revenue';
+import AccountStatement from './pages/reports/Accountstatement';
+
 
 const App = () => {
   // For Direct to Dashboard
@@ -74,20 +82,7 @@ const App = () => {
         <div className={currentMode === 'Dark' ? 'dark' : ''}>
         <div className="flex relative dark:bg-main-dark-bg">
           <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
-            <TooltipComponent
-              content="Settings"
-              position="Top"
-            >
-              <button
-                type="button"
-                onClick={() => setThemeSettings(true)}
-                style={{ background: currentColor, borderRadius: '50%' }}
-                className="text-3xl text-white p-3 hover:drop-shadow-xl hover:bg-light-gray"
-              >
-                <FiSettings />
-              </button>
-
-            </TooltipComponent>
+            
           </div>
           {activeMenu ? (
             <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
@@ -110,12 +105,13 @@ const App = () => {
               <Navbar />
             </div>
             <div>
-              {themeSettings && (<ThemeSettings />)}
+              
 
               <Routes>
                 
                 {/* pages  */}
                 <Route path='/' element={<Dashboard/>}/>
+                <Route path='/dashboard' element={<Dashboard/>}/>
                 <Route path="/branches" element={<Branches />} />
                 <Route path="/members" element={<Members />} />
                 <Route path='/accounts' element={<Accounts/>}/>
@@ -126,6 +122,16 @@ const App = () => {
                 <Route path='/transaction' element={<Transaction/>}/>
                 <Route path='/expense' element={<Expense/>}/>
                 <Route path='/user' element={<User/>}/>
+                <Route path='/reports' element={<AccountStatement/>}/>
+                <Route path='/accountstatement' element={<Accountstatement/>}/>
+                <Route path='/accountbalance' element={<Accountbalance/>}/>
+                <Route path='/loandue' element={<Loandue/>}/>
+                <Route path='/loanreport' element={<Loanreport/>}/>
+                <Route path='/loandue' element={<Loandue/>}/>
+                <Route path='/Transactionreport' element={<TransactionReport/>}/>
+                <Route path='/ExpenseReport' element={<ExpenseReport/>}/>
+                <Route path='/RevenueReport' element={<RevenueReport/>}/>
+                
   
               </Routes>
             </div>
