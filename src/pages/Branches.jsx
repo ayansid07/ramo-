@@ -261,6 +261,7 @@ const Branches = () => {
               name='branchId'
               value={formData.branchId}
               onChange={handleInputChange}
+              readOnly
             />
           </Form.Group>
           <Form.Group controlId="formName">
