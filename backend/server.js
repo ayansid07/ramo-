@@ -387,6 +387,112 @@ app.get('/getbranch/:id', async (req, res) => {
   }
 });
 
+// Define an endpoint to fetch branch names
+app.get('/branches/names', limiter, async (req, res) => {
+  try {
+    const allBranches = await branchesModel.find({}, { branchName: 1, _id: 0 });
+
+    const branchNames = allBranches.map(branch => branch.branchName);
+
+    res.status(200).json({ message: 'All branch names retrieved successfully', data: branchNames });
+  } catch (error) {
+    console.error('Error retrieving branch names:', error);
+    res.status(500).json({ message: 'Error retrieving branch names' });
+  }
+});
+
+app.post('/createmember', limiter, async (req, res) => {
+  const {
+    memberNo, firstName, lastName, email, branchName
+  } = req.body;
+
+  try {
+    const newMember = new memberModel({
+      memberNo,
+      firstName,
+      lastName,
+      email,
+      branchName
+    });
+
+    await newMember.save();
+
+    res.status(200).json({ message: 'Member data saved to MongoDB', data: newMember });
+  } catch (error) {
+    console.error('Error saving member data:', error);
+    res.status(500).json({ message: 'Error saving member data' });
+  }
+});
+
+app.put('/updatemember/:id', limiter, async (req, res) => {
+  const memberId = req.params.id;
+  const { memberNo, firstName, lastName, email, branchName } = req.body;
+
+  try {
+    const updatedMember = await memberModel.findByIdAndUpdate(
+      memberId,
+      { memberNo, firstName, lastName, email, branchName },
+      { new: true }
+    );
+
+    if (!updatedMember) {
+      return res.status(404).json({ message: 'Member not found' });
+    }
+
+    res.status(200).json({ message: 'Member updated successfully', data: updatedMember });
+  } catch (error) {
+    console.error('Error updating member:', error);
+    res.status(500).json({ message: 'Error updating member' });
+  }
+});
+
+app.post('/deletemember/:id', limiter, async (req, res) => {
+  const memberId = req.params.id;
+  try {
+    const deletedMember = await memberModel.findByIdAndDelete(memberId);
+
+    if (!deletedMember) {
+      return res.status(404).json({ message: 'Member not found' });
+    }
+
+    res.status(200).json({ message: 'Member deleted successfully', data: deletedMember });
+  } catch (error) {
+    console.error('Error deleting member:', error);
+    res.status(500).json({ message: 'Error deleting member' });
+  }
+});
+
+app.get('/readmembers', limiter, async (req, res) => {
+  try {
+    const allMembers = await memberModel.find();
+
+    res.status(200).json({ message: 'All members retrieved successfully', data: allMembers });
+  } catch (error) {
+    console.error('Error retrieving members:', error);
+    res.status(500).json({ message: 'Error retrieving members' });
+  }
+});
+
+// GET member by ID
+app.get('/getmember/:id', async (req, res) => {
+  const memberId = req.params.id;
+
+  try {
+    // Find the member by ID in your MongoDB database using Mongoose
+    const member = await memberModel.findById(memberId);
+
+    if (!member) {
+      return res.status(404).json({ message: 'Member not found' });
+    }
+
+    // If the member is found, send it as a response
+    res.status(200).json(member);
+  } catch (error) {
+    console.error('Error retrieving member:', error);
+    res.status(500).json({ message: 'Error retrieving member' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
