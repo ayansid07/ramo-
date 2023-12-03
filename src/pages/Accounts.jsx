@@ -18,6 +18,7 @@ const Accounts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredAccounts, setFilteredAccounts] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [membersData, setMembersData] = useState([]);
 
   const handleOpenModal = () => setShowModal(true);
 
@@ -128,7 +129,7 @@ const Accounts = () => {
     handleCloseModal();
   };
 
-  useEffect( () => {
+  useEffect( async () => {
     // Fetch accounts data from an API endpoint using Axios
     axios.get('http://localhost:3001/readaccounts')
       .then(response => {
@@ -137,6 +138,14 @@ const Accounts = () => {
       .catch(error => {
         console.error('Error fetching accounts:', error);
       });
+
+    const response = await axios.get('http://localhost:3001/readmembersname')
+    .then(response => {
+      console.log('Member Name Status:',response);
+      setMembersData(response.data.data);
+    })
+    .catch(error => console.log('Error Fetching Member Numbers'));   
+
   }, []); // Run once on component mount
 
   useEffect(() => {
@@ -185,15 +194,22 @@ const Accounts = () => {
               />
             </Form.Group>
             <Form.Group controlId="formMember">
-              <Form.Label>Member</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter member name"
-                name="member"
-                value={formData.member}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+            <Form.Label>Member</Form.Label>
+            <Form.Control
+              as="select" // Render as a dropdown select
+              name="member"
+              value={formData.member}
+              onChange={handleInputChange}
+            >
+              <option value="">Select member</option>
+              {/* Map through the membersData array to create options */}
+              {membersData.map((member) => (
+                <option key={member.id} value={member.name}>
+                  {member.name}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
             <Form.Group controlId="formAccountType">
               <Form.Label>Account Type</Form.Label>
               <Form.Control

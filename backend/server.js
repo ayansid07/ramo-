@@ -101,7 +101,7 @@ const memberModel = mongoose.model('members',memberSchema);
 const loansModel = mongoose.model('loans',loanSchema);
 const repaymentModel= mongoose.model('repayments',RepaymentSchema);
 const AccountModel = mongoose.model('accounts',AccountSchema);
-const TransactionsSchema = mongoose.model('transactions',transactionsSchema);
+const TransactionsModel = mongoose.model('transactions',TransactionSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -446,6 +446,21 @@ app.get('/readmembers', limiter, async (req, res) => {
   } catch (error) {
     console.error('Error retrieving members:', error);
     res.status(500).json({ message: 'Error retrieving members' });
+  }
+});
+
+app.get('/readmembersname', limiter, async (req, res) => {
+  try {
+    const allMembers = await memberModel.find({}, 'firstName lastName'); // Fetch 'firstName' and 'lastName' fields
+
+    const memberNames = allMembers.map(member => ({
+      name: `${member.firstName} ${member.lastName}` // Concatenate 'firstName' and 'lastName'
+    }));
+
+    res.status(200).json({ message: 'All member names retrieved successfully', data: memberNames });
+  } catch (error) {
+    console.error('Error retrieving member names:', error);
+    res.status(500).json({ message: 'Error retrieving member names' });
   }
 });
 
