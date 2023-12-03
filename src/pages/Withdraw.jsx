@@ -11,7 +11,7 @@ const Withdraw = () => {
     accountNumber: '',
     amount: '',
     debitOrCredit: 'Debit',
-    status: 'Completed',
+    status: '',
     description: '',
   });
 
