@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Form, Button, Container } from 'react-bootstrap';
 import './depositform.css'; // Import the custom CSS file
 
@@ -8,42 +9,32 @@ const Deposit = () => {
     member: '',
     accountNumber: '',
     amount: '',
-    status: 'Completed',
-    description: '',
+    debitOrCredit: 'Credit',
+    status: '',
+    description: ''
   });
 
   const [members, setMembers] = useState([]);
   const [accounts, setAccounts] = useState([]);
 
-  useEffect(() => {
-    // Fetch members from API
-    fetchMembers();
+  useEffect(  () => {
+    const fetchData = async () => {
+      try {
+        const memberResponse = await axios.get('http://localhost:3001/readmemberids');
+        setMembers(memberResponse.data.data);
+        console.log('Member IDs Status:', memberResponse);
 
-    // Fetch accounts from API
-    fetchAccounts();
-  }, []);
+        const accountResponse = await axios.get('http://localhost:3001/readaccountnumbers');
+        setAccounts(accountResponse.data);
+        console.log('Account Numbers Status:', accountResponse);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-  const fetchMembers = async () => {
-    try {
-      // Replace 'your-members-api-endpoint' with the actual API endpoint for members
-      const response = await fetch('your-members-api-endpoint');
-      const data = await response.json();
-      setMembers(data); // Assuming data is an array of members
-    } catch (error) {
-      console.error('Error fetching members:', error);
-    }
-  };
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only once on component mount
 
-  const fetchAccounts = async () => {
-    try {
-      // Replace 'your-accounts-api-endpoint' with the actual API endpoint for accounts
-      const response = await fetch('your-accounts-api-endpoint');
-      const data = await response.json();
-      setAccounts(data); // Assuming data is an array of accounts
-    } catch (error) {
-      console.error('Error fetching accounts:', error);
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -53,11 +44,36 @@ const Deposit = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add logic to send form data to your API
-    console.log(formData);
     
+    try {
+      // Send form data to your API endpoint to create a transaction
+      const response = await fetch('http://localhost:3001/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      console.log('Transaction created:', data); // Log the response from the server
+      
+      // Reset form fields after successful submission if needed
+      setFormData({
+        date: '',
+        member: '',
+        accountNumber: '',
+        amount: '',
+        debitOrCredit: 'Credit',
+        status: '',
+        description: ''
+      });
+
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+    }
   };
 
   return (
@@ -88,29 +104,29 @@ const Deposit = () => {
             <option value="">Select Member</option>
             {members.map((member) => (
               <option key={member.id} value={member.id}>
-                {member.name}
+                {member.id}
               </option>
             ))}
           </Form.Control>
         </Form.Group>
         <Form.Group controlId="accountNumber">
-          <Form.Label className="custom-form-label">Account Number *</Form.Label>
-          <Form.Control
-          className="custom-form-control"
-            as="select"
-            name="accountNumber"
-            value={formData.accountNumber}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="">Select Account</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.accountNumber}>
-                {account.accountNumber}
-              </option>
-            ))}
-          </Form.Control>
-        </Form.Group>
+            <Form.Label className="custom-form-label">Account Number *</Form.Label>
+            <Form.Control
+              className="custom-form-control"
+              as="select"
+              name="accountNumber"
+              value={formData.accountNumber}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Account</option>
+              {accounts.map((accountNumber) => (
+                <option key={accountNumber} value={accountNumber}>
+                  {accountNumber}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
         <Form.Group controlId="amount">
           <Form.Label className="custom-form-label">Amount *</Form.Label>
           <Form.Control
@@ -132,6 +148,7 @@ const Deposit = () => {
             onChange={handleInputChange}
             required
           >
+            <option value="">Please Select an Option</option>
             <option value="Completed">Completed</option>
             <option value="Pending">Pending</option>
             <option value="Cancelled">Cancelled</option>

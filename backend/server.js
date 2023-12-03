@@ -464,6 +464,21 @@ app.get('/readmembersname', limiter, async (req, res) => {
   }
 });
 
+app.get('/readmemberids', limiter, async (req, res) => {
+  try {
+    const allMembers = await memberModel.find({}, 'memberNo'); // Fetch only the '_id' field
+
+    const memberIds = allMembers.map(member => ({
+      id: member.memberNo // Retrieve '_id' field
+    }));
+
+    res.status(200).json({ message: 'All member IDs retrieved successfully', data: memberIds });
+  } catch (error) {
+    console.error('Error retrieving member IDs:', error);
+    res.status(500).json({ message: 'Error retrieving member IDs' });
+  }
+});
+
 // GET member by ID
 app.get('/getmember/:id', async (req, res) => {
   const memberId = req.params.id;
@@ -729,6 +744,17 @@ app.put('/updateaccounts/:id', async (req, res) => {
   }
 });
 
+// Get all account numbers
+app.get('/readaccountnumbers', async (req, res) => {
+  try {
+    const accountNumbers = await AccountModel.find({}, 'accountNumber');
+    const numbers = accountNumbers.map(account => account.accountNumber);
+    res.json(numbers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Delete an account by ID
 app.post('/deleteaccounts/:id', async (req, res) => {
   try {
@@ -739,6 +765,58 @@ app.post('/deleteaccounts/:id', async (req, res) => {
     res.json({ message: 'Account deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/transactions', async (req, res) => {
+  try {
+    const newTransaction = await TransactionsModel.create(req.body);
+    res.status(201).json({ message: 'Transaction created successfully', data: newTransaction });
+  } catch (error) {
+    console.error('Error creating transaction:', error);
+    res.status(500).json({ message: 'Error creating transaction' });
+  }
+});
+
+app.get('/transactions/:id', async (req, res) => {
+  try {
+    const transaction = await TransactionsModel.findById(req.params.id);
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    res.status(200).json({ message: 'Transaction retrieved successfully', data: transaction });
+  } catch (error) {
+    console.error('Error retrieving transaction:', error);
+    res.status(500).json({ message: 'Error retrieving transaction' });
+  }
+});
+
+app.put('/transactions/:id', async (req, res) => {
+  try {
+    const updatedTransaction = await TransactionsModel.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!updatedTransaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    res.status(200).json({ message: 'Transaction updated successfully', data: updatedTransaction });
+  } catch (error) {
+    console.error('Error updating transaction:', error);
+    res.status(500).json({ message: 'Error updating transaction' });
+  }
+});
+
+app.delete('/transactions/:id', async (req, res) => {
+  try {
+    const deletedTransaction = await TransactionsModel.findByIdAndDelete(req.params.id);
+    if (!deletedTransaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    res.status(200).json({ message: 'Transaction deleted successfully', data: deletedTransaction });
+  } catch (error) {
+    console.error('Error deleting transaction:', error);
+    res.status(500).json({ message: 'Error deleting transaction' });
   }
 });
 
