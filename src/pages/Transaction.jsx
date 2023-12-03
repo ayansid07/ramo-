@@ -62,9 +62,7 @@ const Transaction = () => {
     try {
       // Send form data to your API endpoint to create a transaction
       const response = await axios.post('http://localhost:3001/transactions', formData);
-
-      const data = await response.json();
-      console.log('Transaction created:', data); // Log the response from the server
+      console.log(response);
       
       // Reset form fields after successful submission if needed
       setFormData({

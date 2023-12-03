@@ -4,6 +4,8 @@ import { Modal, Button, Form, Table, Badge } from 'react-bootstrap';
 
 const User = () => {
   const [showModal, setShowModal] = useState(false);
+  const [showeditModal, setShowEditModal] = useState(false);
+  const [editUserId, setEditUserId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,11 +14,86 @@ const User = () => {
     status: '',
     image: null,
   });
+
+  const handleEditModalOpen = async (userId) => {
+    setEditUserId(userId);
+
+    try {
+      const response = await axios.get(`http://localhost:3001/api/users/${userId}`);
+      const userData = response.data;
+
+      setShowEditModal(true);
+      setFormData({
+        name: userData.name,
+        email: userData.email,
+        password: userData.password, // Assuming you don't want to pre-fill password in the form for security reasons
+        userType: userData.userType,
+        status: userData.status,
+        image: userData.image, // Reset image in the form
+      });
+    } catch (error) {
+      console.error('Error fetching user data for edit:', error);
+      // Handle error or display an error message to the user
+    }
+  };
+
+  const handleCloseeditModal = () => {
+    setShowEditModal(false);
+    // Reset formData when closing the modal
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      userType: '',
+      status: '',
+      image: null,
+    });
+  };
+
   const [usersData, setUsersData] = useState([]);
 
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
 
+  const handleEdit = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const formDataForApi = new FormData();
+      formDataForApi.append('name', formData.name);
+      formDataForApi.append('email', formData.email);
+      formDataForApi.append('password', formData.password);
+      formDataForApi.append('userType', formData.userType);
+      formDataForApi.append('status', formData.status);
+      formDataForApi.append('image', formData.image);
+  
+      const response = await axios.put(`http://localhost:3001/api/users/${editUserId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      console.log('User updated:', response.data);
+      
+      // Clear the form data state after successful update
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        userType: '',
+        status: '',
+        image: null,
+      });
+  
+      setShowEditModal(false);
+      // Perform necessary actions after successful update
+      // fetchUserData(); // Assuming you have a function to fetch user data
+    } catch (error) {
+      console.error('Error updating user:', error.response?.data);
+      // Handle error or display an error message to the user
+    }
+  };
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -24,7 +101,7 @@ const User = () => {
       [name]: value,
     }));
   };
-
+  
   const handleImageChange = (e) => {
     const imageFile = e.target.files[0];
     setFormData((prevData) => ({
@@ -32,7 +109,7 @@ const User = () => {
       image: imageFile,
     }));
   };
-
+        
   const handleSubmit = async (e) => {
     e.preventDefault();
   
@@ -52,6 +129,10 @@ const User = () => {
       });
   
       console.log('User created:', response.data);
+      // Clear the formDataForApi after successful submission
+      formDataForApi.forEach((value, key) => {
+      formDataForApi.delete(key);
+    });
       handleCloseModal();
     } catch (error) {
       console.error('Error creating user:', error);
@@ -75,20 +156,18 @@ const User = () => {
     fetchUserData();
   }, []); // Run once on component mount
 
-  const handleEdit = (index) => {
-    // Implement edit logic here
-    // You can pre-fill the form with existing data for editing
-    // and open the modal
+  const handleDelete = async (userId) => {
+    try {
+      // Make an Axios DELETE request to the API endpoint to delete the image
+      const response = await axios.delete(`http://localhost:3001/api/users/${userId}`);
+      console.log('Entry deleted:', response.data);
+  
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle error or display an error message to the user
+    }
   };
-
-  const handleDelete = (index) => {
-    // Implement delete logic here
-    // Remove the user from the usersData array
-    const updatedUsersData = [...usersData];
-    updatedUsersData.splice(index, 1);
-    setUsersData(updatedUsersData);
-  };
-
+  
   return (
     <div className='body-div'>
       <Button onClick={handleOpenModal}>Add User</Button>
@@ -178,6 +257,91 @@ const User = () => {
         </Modal.Body>
       </Modal>
 
+      <Modal show={showeditModal} onHide={handleCloseeditModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Update User</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleEdit}>
+
+          <Form.Group controlId="formName">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmail">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Enter password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formUserType">
+              <Form.Label>User Type</Form.Label>
+              <Form.Control
+                as="select"
+                name="userType"
+                value={formData.userType}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select User Type</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="formStatus">
+              <Form.Label>Status</Form.Label>
+              <Form.Control
+                as="select"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </Form.Control>
+            </Form.Group>
+      
+            <Form.Group controlId="formImage">
+              <Form.Label>Image</Form.Label>
+              <Form.Control
+                type="file"
+                accept="image/*"
+                name="image"
+                onChange={handleImageChange}
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Update
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
       <Table striped bordered hover className="mt-4">
         <thead>
           <tr>
@@ -192,18 +356,18 @@ const User = () => {
         <tbody>
           {usersData.map((user, index) => (
             <tr key={index}>
-                <td>
-                  {user.image ? (
-                    <img
-                      src={`/backend/${user.image}`} // Replace 'http://localhost:3001/' with your actual server URL
-                      alt="Profile"
-                      width="40"
-                      height="40"
-                    />
-                  ) : (
-                    'No Image'
-                  )}
-                </td>
+              <td>
+                {user.image ? (
+                  <img
+                    src={`http://localhost:3001/backend/${user.image}`} // Replace 'http://localhost:3001/' with your actual server URL
+                    alt="Profile"
+                    width="40"
+                    height="40"
+                  />
+                ) : (
+                  'No Image'
+                )}
+              </td>
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.userType}</td>
@@ -213,10 +377,10 @@ const User = () => {
                 </Badge>
               </td>
               <td>
-                <Button variant="warning" onClick={() => handleEdit(index)}>
+                <Button variant="warning" onClick={() => handleEditModalOpen(user._id)}>
                   Edit
                 </Button>{' '}
-                <Button variant="danger" onClick={() => handleDelete(index)}>
+                <Button variant="danger" onClick={() => handleDelete(user._id)}>
                   Delete
                 </Button>
               </td>

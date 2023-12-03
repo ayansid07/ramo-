@@ -115,7 +115,7 @@ const expenseSchema = new mongoose.Schema({
 },{collection:'expenses'});
 
 const intuserSchema = new mongoose.Schema({
-  image: { type: String, required: true},
+  image: { type: String },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true }, // Adding password field
@@ -951,7 +951,7 @@ app.get('/api/users', async (req, res) => {
 });
 
 // Get a user by ID
-app.get('/api/users/:id', async (req, res) => {
+app.get('api/users/:id', async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await intuserModel.findById(userId);
@@ -964,17 +964,21 @@ app.get('/api/users/:id', async (req, res) => {
   }
 });
 
-// Update a user by ID
 app.put('/api/users/:id', async (req, res) => {
   try {
     const userId = req.params.id;
-    const updatedUser = await intuserModel.findByIdAndUpdate(userId, req.body, { new: true });
+    const updatedUserData = req.body; // Ensure this data matches your schema
+
+    // Assuming intuserModel represents your Mongoose model
+    const updatedUser = await intuserModel.findByIdAndUpdate(userId, updatedUserData, { new: true });
+
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.status(200).json(updatedUser);
+
+    res.status(200).json(updatedUser); // Send the updated user data back to the client
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message }); // Handle server errors
   }
 });
 
@@ -982,11 +986,46 @@ app.put('/api/users/:id', async (req, res) => {
 app.delete('/api/users/:id', async (req, res) => {
   try {
     const userId = req.params.id;
-    const deletedUser = await intuserModel.findByIdAndDelete(userId);
-    if (!deletedUser) {
+
+    // Fetch the user data by ID
+    const user = await intuserModel.findById(userId);
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.status(200).json(deletedUser);
+
+    // Delete the associated image file if it exists
+    if (user.image) {
+      const imagePath = path.join(__dirname, 'uploads', user.image); // Replace 'your_image_directory' with your actual image directory
+      fs.unlink(imagePath, async (err) => {
+        if (err) {
+          console.error('Error deleting image:', err);
+          return res.status(500).json({ message: 'Error deleting image' });
+        }
+        console.log('Image deleted:', user.image);
+        
+        // Proceed to delete the user entry after deleting the image
+        try {
+          const deletedUser = await intuserModel.findByIdAndDelete(userId);
+          if (!deletedUser) {
+            return res.status(404).json({ message: 'User not found' });
+          }
+          res.status(200).json({ deletedUser, message: 'User and image deleted successfully' });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
+      });
+    } else {
+      // If there's no associated image, directly delete the user entry
+      try {
+        const deletedUser = await intuserModel.findByIdAndDelete(userId);
+        if (!deletedUser) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ deletedUser, message: 'User deleted successfully' });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -1003,6 +1042,25 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   // Store `filePath` in your database associated with the user or as needed
 
   return res.status(200).json({ filePath });
+});
+
+app.get('/transactionsByDate', async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'Start date and end date are required' });
+    }
+
+    const filteredTransactions = await TransactionsModel.find({
+      date: { $gte: new Date(startDate), $lte: new Date(endDate) }
+    });
+
+    res.status(200).json({ message: 'Transactions retrieved successfully', data: filteredTransactions });
+  } catch (error) {
+    console.error('Error filtering transactions by date:', error);
+    res.status(500).json({ message: 'Error filtering transactions by date' });
+  }
 });
 
 app.listen(PORT, () => {

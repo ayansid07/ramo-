@@ -3,6 +3,7 @@ import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import Reports from '../Reports';
 
 export default function Transaction() {
+
   return (
     <div>
       <Reports />
