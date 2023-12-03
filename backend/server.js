@@ -95,6 +95,14 @@ const TransactionSchema = new mongoose.Schema({
   description: { type: String, required: true }
 },{collection:'transactions'});
 
+const expenseSchema = new mongoose.Schema({
+  date: { type: Date, default: Date.now },
+  category: {type: String, required: true},
+  amount: {type: Number, required: true},
+  reference: {type: String, required: true},
+  note: {type: String, required: true},
+},{collection:'expenses'});
+
 const userModel = mongoose.model('userdata', userSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
 const memberModel = mongoose.model('members',memberSchema);
@@ -102,6 +110,7 @@ const loansModel = mongoose.model('loans',loanSchema);
 const repaymentModel= mongoose.model('repayments',RepaymentSchema);
 const AccountModel = mongoose.model('accounts',AccountSchema);
 const TransactionsModel = mongoose.model('transactions',TransactionSchema);
+const ExpenseModel = mongoose.model('expenses',expenseSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -817,6 +826,55 @@ app.delete('/transactions/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting transaction:', error);
     res.status(500).json({ message: 'Error deleting transaction' });
+  }
+});
+
+// Create Expense
+app.post('/expenses', async (req, res) => {
+  try {
+    const { date, category, amount, reference, note } = req.body;
+    const newExpense = new ExpenseModel({ date, category, amount, reference, note });
+    const savedExpense = await newExpense.save();
+    res.status(201).json(savedExpense);
+  } catch (error) {
+    res.status(400).json({ message: 'Error creating expense', error: error.message });
+  }
+});
+
+// Read all Expenses
+app.get('/expenses', async (req, res) => {
+  try {
+    const expenses = await ExpenseModel.find();
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving expenses', error: error.message });
+  }
+});
+
+// Update Expense
+app.put('/expenses/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date, category, amount, reference, note } = req.body;
+    const updatedExpense = await ExpenseModel.findByIdAndUpdate(
+      id,
+      { date, category, amount, reference, note },
+      { new: true }
+    );
+    res.json(updatedExpense);
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating expense', error: error.message });
+  }
+});
+
+// Delete Expense
+app.delete('/expenses/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await ExpenseModel.findByIdAndDelete(id);
+    res.json({ message: 'Expense deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ message: 'Error deleting expense', error: error.message });
   }
 });
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
+import axios from 'axios';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const Expense = () => {
@@ -28,6 +29,16 @@ const Expense = () => {
       }
     };
 
+    const fetchExpenses = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/expenses'); // Replace with your expenses endpoint
+        setExpenses(response.data); // Assuming the response data contains an array of expenses
+      } catch (error) {
+        console.error('Error fetching expenses:', error);
+      }
+    };
+
+    fetchExpenses();
     fetchCategories();
   }, []);
 
@@ -59,12 +70,28 @@ const Expense = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add logic to handle form submission (e.g., send data to the server)
-    const newExpense = { ...formData };
-    setExpenses((prevExpenses) => [...prevExpenses, newExpense]);
-    // Close the modal after submission
+    try {
+      // Send form data to your API endpoint to create a transaction
+      const response = await axios.post('http://localhost:3001/expenses', formData);
+
+      const data = await response.json();
+      console.log('Expense created:', data); // Log the response from the server
+      
+      // Reset form fields after successful submission if needed
+      setFormData({
+        date: new Date(),
+        category: '',
+        amount: '',
+        reference: '',
+        note: '',
+      });
+
+    } catch (error) {
+      console.error('Error creating Expense:', error);
+    }
+    console.log(formData);
     handleModalClose();
   };
 
@@ -100,11 +127,13 @@ const Expense = () => {
                 required
               >
                 <option value="">Select Category</option>
-                {categories.map((category) => (
+                {/* {categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
-                ))}
+                ))} */}
+                <option value="A">Category A</option>
+                <option value="B">Category B</option>
               </Form.Control>
             </Form.Group>
             <Form.Group controlId="amount">
@@ -156,13 +185,13 @@ const Expense = () => {
         </thead>
         <tbody>
           {expenses.map((expense, index) => (
-            <tr key={index}>
-              <td>{expense.date.toISOString().split('T')[0]}</td>
-              <td>{expense.category}</td>
-              <td>{expense.amount}</td>
-              <td>{expense.reference}</td>
-              <td>{expense.note}</td>
-            </tr>
+          <tr key={index}>
+            <td>{new Date(expense.date).toISOString().split('T')[0]}</td>
+            <td>{expense.category}</td>
+            <td>{expense.amount}</td>
+            <td>{expense.reference}</td>
+            <td>{expense.note}</td>
+          </tr>
           ))}
         </tbody>
       </Table>
