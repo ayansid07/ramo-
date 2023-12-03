@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
+import axios from 'axios';
 import { Modal, Button, Form, Table, Badge } from 'react-bootstrap';
 
 const User = () => {
@@ -32,10 +33,9 @@ const User = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Prepare form data for API submission
+  
     const formDataForApi = new FormData();
     formDataForApi.append('name', formData.name);
     formDataForApi.append('email', formData.email);
@@ -43,12 +43,37 @@ const User = () => {
     formDataForApi.append('userType', formData.userType);
     formDataForApi.append('status', formData.status);
     formDataForApi.append('image', formData.image);
-
-    // Add logic to send formDataForApi to the server using fetch or your preferred method
-
-    setUsersData((prevData) => [...prevData, formData]);
-    handleCloseModal();
+  
+    try {
+      const response = await axios.post('http://localhost:3001/users', formDataForApi, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // Set proper headers for FormData
+        },
+      });
+  
+      console.log('User created:', response.data);
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error creating user:', error);
+      // Handle error or display an error message to the user
+    }
   };
+
+  useEffect(() => {
+    // Function to fetch user data from the backend
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/users'); // Replace with your API endpoint
+        setUsersData(response.data); // Update usersData state with the fetched data
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        // Handle error or display an error message to the user
+      }
+    };
+
+    // Call the function to fetch user data when the component mounts
+    fetchUserData();
+  }, []); // Run once on component mount
 
   const handleEdit = (index) => {
     // Implement edit logic here
@@ -167,18 +192,18 @@ const User = () => {
         <tbody>
           {usersData.map((user, index) => (
             <tr key={index}>
-              <td>
-                {user.image ? (
-                  <img
-                    src={URL.createObjectURL(user.image)}
-                    alt="Profile"
-                    width="40"
-                    height="40"
-                  />
-                ) : (
-                  'No Image'
-                )}
-              </td>
+                <td>
+                  {user.image ? (
+                    <img
+                      src={`/backend/${user.image}`} // Replace 'http://localhost:3001/' with your actual server URL
+                      alt="Profile"
+                      width="40"
+                      height="40"
+                    />
+                  ) : (
+                    'No Image'
+                  )}
+                </td>
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.userType}</td>

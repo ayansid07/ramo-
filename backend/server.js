@@ -3,6 +3,10 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config(); // Load environment variables from .env file
 
 const app = express();
@@ -22,6 +26,13 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => {
   console.log('Connected to MongoDB Atlas');
 });
+
+const uploadDir = 'uploads';
+
+// Check if the directory exists, create it if it doesn't
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // User login database
 const userSchema = new mongoose.Schema({
@@ -103,6 +114,15 @@ const expenseSchema = new mongoose.Schema({
   note: {type: String, required: true},
 },{collection:'expenses'});
 
+const intuserSchema = new mongoose.Schema({
+  image: { type: String, required: true},
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true }, // Adding password field
+  userType: { type: String, enum: ['user', 'admin'], default: 'user' },
+  status: { type: String, enum: ['active', 'inactive'], default: 'active' }
+}, { collection: 'intuserdata' });
+
 const userModel = mongoose.model('userdata', userSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
 const memberModel = mongoose.model('members',memberSchema);
@@ -111,9 +131,24 @@ const repaymentModel= mongoose.model('repayments',RepaymentSchema);
 const AccountModel = mongoose.model('accounts',AccountSchema);
 const TransactionsModel = mongoose.model('transactions',TransactionSchema);
 const ExpenseModel = mongoose.model('expenses',expenseSchema);
+const intuserModel = mongoose.model('intuserdata',intuserSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
+
+// Multer configuration for handling file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads'); // Uploads directory where files will be stored
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
+    const fileExtension = path.extname(file.originalname);
+    cb(null, `${uniqueSuffix}${fileExtension}`);
+  },
+});
+
+const upload = multer({ storage });
 
 // Set security headers
 app.use((req, res, next) => {
@@ -876,6 +911,98 @@ app.delete('/expenses/:id', async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: 'Error deleting expense', error: error.message });
   }
+});
+
+// Route to add a new user to the database
+app.post('/users', upload.single('image'), async (req, res) => {
+  try {
+    const { name, email, password, userType, status } = req.body;
+
+    // Get the file path of the uploaded image
+    const imagePath = req.file.path;
+
+    // Create a new user object with Mongoose User model
+    const newUser = new intuserModel({
+      name,
+      email,
+      password,
+      userType,
+      status,
+      image: imagePath, // Assign the file path to the user's image property
+    });
+
+    // Save the new user to the database
+    const savedUser = await newUser.save();
+
+    res.status(201).json({ message: 'User created successfully!', user: savedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create user', error: error.message });
+  }
+});
+
+// Get all users
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await intuserModel.find();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get a user by ID
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await intuserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update a user by ID
+app.put('/api/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const updatedUser = await intuserModel.findByIdAndUpdate(userId, req.body, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete a user by ID
+app.delete('/api/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const deletedUser = await intuserModel.findByIdAndDelete(userId);
+    if (!deletedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(deletedUser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API endpoint for handling file upload
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+
+  // Logic to store the file path in your database (replace this with your database storage logic)
+  const filePath = req.file.path; // File path where the image is stored
+  // Store `filePath` in your database associated with the user or as needed
+
+  return res.status(200).json({ filePath });
 });
 
 app.listen(PORT, () => {
