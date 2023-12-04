@@ -3,6 +3,13 @@ import { Form, Button, Row, Col, Table } from 'react-bootstrap';
 import Reports from '../Reports';
 
 const AccountStatement = () => {
+  const handleExportToPDF = () => {
+    const blob = new Blob([<MyDocument data={data} />], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'AccStatement.pdf';
+    link.click();
+  };
   return (
     <div>
     <Reports />
@@ -29,7 +36,12 @@ const AccountStatement = () => {
                 <Button variant="primary" type="button" className="mt-8">
                   Search
                 </Button>
+                 <Button variant="danger" onClick={handleExportToPDF}>
+                  Export to PDF
+                </Button>
+
               </Col>
+              
             </Row>
           </Form>
         </Col>

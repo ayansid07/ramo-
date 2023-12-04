@@ -27,6 +27,8 @@ import {
 import { GiReceiveMoney, GiPayMoney,GiMoneyStack,GiTakeMyMoney,GiExpense } from "react-icons/gi";
 import { MdAccountBalance } from "react-icons/md";
 import { GoReport } from "react-icons/go";
+import { MdDashboard } from "react-icons/md";
+import { AiOutlineBranches } from "react-icons/ai";
 
 import { GrTransaction } from "react-icons/gr";
 import { FaUser } from "react-icons/fa";
@@ -60,11 +62,12 @@ export const links = [
     links: [
       {
         name: "Dashboard",
-        icon: <FiShoppingBag />,
+        icon: <MdDashboard />,
+       
       },
       {
         name: "Branches",
-        icon: <FiShoppingBag />,
+        icon: <AiOutlineBranches />,
       },
     ],
   },

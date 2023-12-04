@@ -61,6 +61,8 @@ const Withdraw = () => {
   };
 
   return (
+    <div className='body-div'>
+
     <Container>
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="date">
@@ -153,6 +155,7 @@ const Withdraw = () => {
         </Button>
       </Form>
     </Container>
+    </div>
   );
 };
 

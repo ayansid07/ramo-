@@ -176,7 +176,7 @@ const Accounts = () => {
               <td>{account.openingBalance}</td>
               <td>
                 <Dropdown>
-                  <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  <Dropdown.Toggle className='btn-secondry' variant="secondary" id="dropdown-basic">
                     Action
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
