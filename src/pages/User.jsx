@@ -19,7 +19,7 @@ const User = () => {
     setEditUserId(userId);
 
     try {
-      const response = await axios.get(`http://localhost:3001/api/users/${userId}`);
+      const response = await axios.get(`http://localhost:3001/usersdetails/${userId}`);
       const userData = response.data;
 
       setShowEditModal(true);
@@ -66,36 +66,36 @@ const User = () => {
       formDataForApi.append('password', formData.password);
       formDataForApi.append('userType', formData.userType);
       formDataForApi.append('status', formData.status);
-      formDataForApi.append('image', formData.image);
   
-      const response = await axios.put(`http://localhost:3001/api/users/${editUserId}`, formData, {
+      const response = await axios.put(`http://localhost:3001/updateintuser/${editUserId}`, formDataForApi, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
   
-      // console.log('User updated:', response.data);
-      
-      // Clear the form data state after successful update
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        userType: '',
-        status: '',
-        image: null,
-      });
-  
-      setShowEditModal(false);
-      // Perform necessary actions after successful update
-      // fetchUserData(); // Assuming you have a function to fetch user data
-      fetchData();
+      if (response.status === 200) {
+        console.log('User updated successfully');
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          userType: '',
+          status: '',
+          image: null,
+        });
+        setShowEditModal(false);
+        fetchData(); // Fetch updated data
+      } else {
+        console.error('Failed to update user');
+        // Handle failure - display an error message or perform necessary actions
+      }
     } catch (error) {
-      // console.error('Error updating user:', error.response?.data);
-      // Handle error or display an error message to the user
+      console.error('Error updating user:', error);
+      // Handle error - display an error message or perform necessary actions
     }
   };
   
+      
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -162,16 +162,14 @@ const User = () => {
 
   const handleDelete = async (userId) => {
     try {
-      // Make an Axios DELETE request to the API endpoint to delete the image
       const response = await axios.delete(`http://localhost:3001/api/users/${userId}`);
-      // console.log('Entry deleted:', response.data);
-  
+      fetchData();
     } catch (error) {
-      // console.error('Error:', error);
+      console.error('Error:', error);
       // Handle error or display an error message to the user
     }
   };
-  
+    
   return (
     <div className='body-div'>
       <Button onClick={handleOpenModal}>Add User</Button>

@@ -625,7 +625,7 @@ app.get('/loans', limiter, async (req, res) => {
 });
 
 // GET endpoint to fetch a specific loan by its ID
-app.get('/loans/:id', async (req, res) => {
+app.get('/loans/:id', limiter,async (req, res) => {
   const loanId = req.params.id;
 
   try {
@@ -1080,7 +1080,7 @@ app.get('/api/users', async (req, res) => {
 });
 
 // Get a user by ID
-app.get('api/users/:id', async (req, res) => {
+app.get('/usersdetails/:id', async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await intuserModel.findById(userId);
@@ -1093,10 +1093,10 @@ app.get('api/users/:id', async (req, res) => {
   }
 });
 
-app.put('/api/users/:id', async (req, res) => {
+app.put('/updateintuser/:id', async (req, res) => {
   try {
     const userId = req.params.id;
-    const updatedUserData = req.body; // Ensure this data matches your schema
+    const updatedUserData = req.body; // Assuming this matches your user model
 
     // Assuming intuserModel represents your Mongoose model
     const updatedUser = await intuserModel.findByIdAndUpdate(userId, updatedUserData, { new: true });
@@ -1116,45 +1116,13 @@ app.delete('/api/users/:id', async (req, res) => {
   try {
     const userId = req.params.id;
 
-    // Fetch the user data by ID
-    const user = await intuserModel.findById(userId);
-    if (!user) {
+    // Find and delete the user entry from the database
+    const deletedUser = await intuserModel.findByIdAndDelete(userId);
+    if (!deletedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Delete the associated image file if it exists
-    if (user.image) {
-      const imagePath = path.join(__dirname, 'uploads', user.image); // Replace 'your_image_directory' with your actual image directory
-      fs.unlink(imagePath, async (err) => {
-        if (err) {
-          console.error('Error deleting image:', err);
-          return res.status(500).json({ message: 'Error deleting image' });
-        }
-        console.log('Image deleted:', user.image);
-        
-        // Proceed to delete the user entry after deleting the image
-        try {
-          const deletedUser = await intuserModel.findByIdAndDelete(userId);
-          if (!deletedUser) {
-            return res.status(404).json({ message: 'User not found' });
-          }
-          res.status(200).json({ deletedUser, message: 'User and image deleted successfully' });
-        } catch (error) {
-          res.status(500).json({ error: error.message });
-        }
-      });
-    } else {
-      // If there's no associated image, directly delete the user entry
-      try {
-        const deletedUser = await intuserModel.findByIdAndDelete(userId);
-        if (!deletedUser) {
-          return res.status(404).json({ message: 'User not found' });
-        }
-        res.status(200).json({ deletedUser, message: 'User deleted successfully' });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-    }
+    res.status(200).json({ deletedUser, message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -1186,7 +1154,7 @@ app.get('/accountstatement', async (req, res) => {
       date: { $gte: start, $lte: end },
       accountNumber: accountNumber
     }, 'date description transactionAmount debitOrCredit currentBalancemoment');
-    
+
     // Format the transactions to match the required response format
     const formattedTransactions = transactions.map(transaction => {
       let debit = 0;
@@ -1211,6 +1179,56 @@ app.get('/accountstatement', async (req, res) => {
     res.status(200).json(formattedTransactions);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch transactions', error: error.message });
+  }
+});
+
+// Endpoint to fetch data based on filters sent in the request body
+app.post('/loanreport', async (req, res) => {
+  try {
+    const { startDate, endDate, loanStatus, memberNo } = req.body;
+    let query = {};
+
+    // Adding filters based on provided request body
+    if (startDate && endDate) {
+      query.releaseDate = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    if (loanStatus) {
+      query.status = loanStatus;
+    }
+
+    if (memberNo) {
+      query.memberNo = memberNo;
+    }
+
+    // Filtering loans data based on query
+    const loans = await loansModel.find(query);
+
+    // Fetching corresponding repayment data for filtered loans
+    const loanIds = loans.map((loan) => loan.loanId);
+    const repayments = await repaymentModel.find({ loanId: { $in: loanIds } });
+
+    // Merging repayments data into loans data based on loanId
+    const mergedData = loans.map((loan) => {
+      const correspondingRepayment = repayments.find((repayment) => repayment.loanId === loan.loanId);
+      return {
+        loanId: loan.loanId,
+        loanProduct: loan.loanProduct,
+        borrower: loan.borrower,
+        memberNo: loan.memberNo,
+        releaseDate: loan.releaseDate,
+        appliedAmount: loan.appliedAmount,
+        status: loan.status,
+        dueAmount: correspondingRepayment ? correspondingRepayment.totalAmount : null,
+      };
+    });
+
+    res.status(200).json(mergedData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
