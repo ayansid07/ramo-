@@ -10,7 +10,7 @@ const Transaction = () => {
     date: '',
     member: '',
     accountNumber: '',
-    amount: '',
+    transactionAmount: '',
     debitOrCredit: '',
     status: '',
     description: '',
@@ -20,8 +20,7 @@ const Transaction = () => {
   const [accounts, setAccounts] = useState([]);
   // const [transactionTypes, setTransactionTypes] = useState([]);
 
-  useEffect(  () => {
-    const fetchData = async () => {
+  const fetchData = async () => {
       try {
         const memberResponse = await axios.get('http://localhost:3001/readmemberids');
         setMembers(memberResponse.data.data);
@@ -35,6 +34,7 @@ const Transaction = () => {
       }
     };
 
+  useEffect(  () => {
     fetchData();
   }, []); // Empty dependency array ensures this runs only once on component mount
  
@@ -62,23 +62,23 @@ const Transaction = () => {
     try {
       // Send form data to your API endpoint to create a transaction
       const response = await axios.post('http://localhost:3001/transactions', formData);
-      console.log(response);
+      // console.log(response);
       
       // Reset form fields after successful submission if needed
       setFormData({
         date: '',
         member: '',
         accountNumber: '',
-        amount: '',
+        transactionAmount: '',
         debitOrCredit: '',
         status: '',
         description: ''
       });
-
+      fetchData();
     } catch (error) {
-      console.error('Error creating transaction:', error);
+      // console.error('Error creating transaction:', error);
     }
-    console.log(formData);
+    // console.log(formData);
   };
 
   return (
@@ -131,13 +131,13 @@ const Transaction = () => {
             ))}
           </Form.Control>
         </Form.Group>
-        <Form.Group controlId="amount">
-          <Form.Label  className="custom-form-label">Amount *</Form.Label>
+        <Form.Group controlId="transactionAmount">
+          <Form.Label  className="custom-form-label">Transaction Amount *</Form.Label>
           <Form.Control
           className="custom-form-control"
             type="number"
-            name="amount"
-            value={formData.amount}
+            name="transactionAmount"
+            value={formData.transactionAmount}
             onChange={handleInputChange}
             required
           />

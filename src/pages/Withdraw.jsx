@@ -69,7 +69,7 @@ const Withdraw = () => {
         status: '',
         description: ''
       });
-
+      fetchData();
     } catch (error) {
       // console.error('Error creating transaction:', error);
     }
@@ -126,7 +126,7 @@ const Withdraw = () => {
             ))}
           </Form.Control>
         </Form.Group>
-        <Form.Group controlId="amount">
+        <Form.Group controlId="transactionAmount">
           <Form.Label className="custom-form-label">Amount *</Form.Label>
           <Form.Control
           className="custom-form-control"
