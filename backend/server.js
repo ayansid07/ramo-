@@ -27,6 +27,9 @@ db.once('open', () => {
   console.log('Connected to MongoDB Atlas');
 });
 
+app.use(bodyParser.json());
+app.use(cors());
+
 const uploadDir = 'uploads';
 
 // Check if the directory exists, create it if it doesn't
@@ -76,35 +79,46 @@ const loanSchema = new mongoose.Schema({
   releaseDate: { type: Date, required: true },
   appliedAmount: { type: Number, required: true },
   status: { type: String, required: true },
-},{collection: 'loans'});
+  account: { type: String, ref: 'AccountModel', required: true }
+}, { collection: 'loans' });
 
-const RepaymentSchema = new mongoose.Schema({
-  loanId: { type: mongoose.Schema.Types.ObjectId,ref: 'loansModel',required: true ,unique: true},
-  paymentDate: { type: Date,required: true},
-  dueDate: {type: Date,required: true},
-  principalAmount: {type: Number,required: true},
-  interest: {type: Number,required: true},
-  latePenalties: {type: Number,required: true},
-  totalAmount: {type:Number,required:true},
-},{collection:'repayments'});
+const repaymentSchema = new mongoose.Schema({
+  loanId: { type: String, ref: 'loansModel', required: true, unique: true },
+  paymentDate: { type: Date, required: true },
+  dueDate: { type: Date, required: true },
+  principalAmount: { type: Number, required: true },
+  interest: { type: Number, required: true },
+  latePenalties: { type: Number, required: true },
+  totalAmount: { type: Number, required: true },
+}, { collection: 'repayments' });
 
-const AccountSchema = new mongoose.Schema({
+const accountSchema = new mongoose.Schema({
   accountNumber: { type: String, required: true, unique: true },
   member: { type: String, required: true },
   accountType: { type: String, required: true },
   status: { type: String, required: true },
-  openingBalance: { type: Number, required: true }
-},{collection:'accounts'});
+  openingBalance: { type: Number, required: true },
+  currentBalance: { type: Number, required: true, default: 0 }
+}, { collection: 'accounts' });
 
-const TransactionSchema = new mongoose.Schema({
+accountSchema.methods.updateBalance = async function (transactionAmount, debitOrCredit) {
+  if (debitOrCredit === 'Debit') {
+    this.currentBalance -= transactionAmount;
+  } else if (debitOrCredit === 'Credit') {
+    this.currentBalance += transactionAmount;
+  }
+  await this.save();
+};
+
+const transactionSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   member: { type: String, required: true },
   accountNumber: { type: String, required: true },
-  amount: { type: Number, required: true },
+  transactionAmount: { type: Number, required: true },
   debitOrCredit: { type: String, enum: ['Debit', 'Credit'], required: true },
   status: { type: String, required: true },
   description: { type: String, required: true }
-},{collection:'transactions'});
+}, { collection: 'transactions' });
 
 const expenseSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
@@ -127,14 +141,11 @@ const userModel = mongoose.model('userdata', userSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
 const memberModel = mongoose.model('members',memberSchema);
 const loansModel = mongoose.model('loans',loanSchema);
-const repaymentModel= mongoose.model('repayments',RepaymentSchema);
-const AccountModel = mongoose.model('accounts',AccountSchema);
-const TransactionsModel = mongoose.model('transactions',TransactionSchema);
+const repaymentModel= mongoose.model('repayments',repaymentSchema);
+const AccountModel = mongoose.model('accounts',accountSchema);
+const TransactionsModel = mongoose.model('transactions',transactionSchema);
 const ExpenseModel = mongoose.model('expenses',expenseSchema);
 const intuserModel = mongoose.model('intuserdata',intuserSchema);
-
-app.use(bodyParser.json());
-app.use(cors());
 
 // Multer configuration for handling file uploads
 const storage = multer.diskStorage({
@@ -543,16 +554,22 @@ app.get('/getmember/:id', async (req, res) => {
   }
 });
 
+// POST endpoint to create a new loan with a specified account ID
 app.post('/createloan', limiter, async (req, res) => {
   const {
-    loanId, loanProduct, borrower, memberNo, releaseDate, appliedAmount, status
+    loanId, loanProduct, borrower, memberNo, releaseDate, appliedAmount, status, account
   } = req.body;
 
   try {
     const newLoan = new loansModel({
-      loanId,loanProduct,borrower,
-      memberNo,releaseDate,appliedAmount,
+      loanId,
+      loanProduct,
+      borrower,
+      memberNo,
+      releaseDate,
+      appliedAmount,
       status,
+      account, // Convert account to ObjectId
     });
 
     await newLoan.save();
@@ -564,14 +581,15 @@ app.post('/createloan', limiter, async (req, res) => {
   }
 });
 
+// PUT endpoint to update an existing loan's details along with its associated account
 app.put('/updateloan/:id', limiter, async (req, res) => {
   const loanId = req.params.id;
-  const { loanProduct, borrower, memberNo, releaseDate, appliedAmount, status } = req.body;
+  const { loanProduct, borrower, memberNo, releaseDate, appliedAmount, status, account } = req.body;
 
   try {
     const updatedLoan = await loansModel.findByIdAndUpdate(
       loanId,
-      { loanProduct, borrower, memberNo, releaseDate, appliedAmount, status },
+      { loanProduct, borrower, memberNo, releaseDate, appliedAmount, status, account },
       { new: true }
     );
 
@@ -586,7 +604,7 @@ app.put('/updateloan/:id', limiter, async (req, res) => {
   }
 });
 
-app.post('/deleteloan/:id', limiter, async (req, res) => {
+app.delete('/deleteloan/:id', limiter, async (req, res) => {
   const loanId = req.params.id;
   try {
     const deletedLoan = await loansModel.findByIdAndDelete(loanId);
@@ -602,6 +620,7 @@ app.post('/deleteloan/:id', limiter, async (req, res) => {
   }
 });
 
+// GET endpoint to fetch all loans
 app.get('/loans', limiter, async (req, res) => {
   try {
     const allLoans = await loansModel.find();
@@ -613,7 +632,25 @@ app.get('/loans', limiter, async (req, res) => {
   }
 });
 
-app.get('/loans/members', limiter, async (req, res) => {
+// GET endpoint to fetch a specific loan by its ID
+app.get('/loans/:id', async (req, res) => {
+  const loanId = req.params.id;
+
+  try {
+    const loan = await loansModel.findById(loanId);
+
+    if (!loan) {
+      return res.status(404).json({ message: 'Loan not found' });
+    }
+
+    res.status(200).json({ message: 'Loan retrieved successfully', data: loan });
+  } catch (error) {
+    console.error('Error retrieving loan:', error);
+    res.status(500).json({ message: 'Error retrieving loan' });
+  }
+});
+
+app.get('/loanmembers', limiter, async (req, res) => {
   try {
     const allMembers = await memberModel.find({}, { memberNo: 1, _id: 0 });
 
@@ -621,39 +658,25 @@ app.get('/loans/members', limiter, async (req, res) => {
 
     res.status(200).json({ message: 'All member numbers retrieved successfully', data: memberNumbers });
   } catch (error) {
-    console.error('Error retrieving member numbers:', error);
+    console.error('Error retrieving member numbers:', error); // Log the specific error
     res.status(500).json({ message: 'Error retrieving member numbers' });
   }
 });
 
-app.get('/loans/:id', async (req, res) => {
-  const x = req.params.id;
-
-  try {
-    // Find the loan by ID in your MongoDB database using Mongoose
-    const loan = await loansModel.findById(x);
-
-    if (!loan) {
-      return res.status(404).json({ message: 'Loan not found' });
-    }
-
-    // If the loan is found, send it as a response
-    res.status(200).json(loan);
-  } catch (error) {
-    console.error('Error retrieving loan:', error);
-    res.status(500).json({ message: 'Error retrieving loan' });
-  }
-});
-
-// Create a new repayment record
-app.post('/createrepayments', async (req, res) => {
+app.post('/repayments', async (req, res) => {
   try {
     const {
-      loanId, paymentDate, dueDate, principalAmount, interest, latePenalties, totalAmount
+      loanId,
+      paymentDate,
+      dueDate,
+      principalAmount,
+      interest,
+      latePenalties,
+      totalAmount
     } = req.body;
 
     const newRepayment = new repaymentModel({
-      loanId: new mongoose.Types.ObjectId(Number(loanId)), // Assign the converted ObjectId to the 'loanId' field in the model
+      loanId,
       paymentDate,
       dueDate,
       principalAmount,
@@ -663,42 +686,45 @@ app.post('/createrepayments', async (req, res) => {
     });
 
     const savedRepayment = await newRepayment.save();
-    res.status(201).json({ message: 'Repayment record created', data: savedRepayment });
+    res.status(200).json({ message: 'Repayment record created', data: savedRepayment });
   } catch (error) {
     res.status(500).json({ message: 'Failed to create repayment record', error: error.message });
   }
 });
 
-// Get all repayment records
-app.get('/readrepayments', async (req, res) => {
+app.get('/repayments', async (req, res) => {
   try {
-    const repayments = await repaymentModel.find();
-    res.status(200).json({ message: 'All repayment records retrieved', data: repayments });
+    const allRepayments = await repaymentModel.find();
+
+    res.status(200).json({ message: 'All repayment records retrieved successfully', data: allRepayments });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to retrieve repayment records', error: error.message });
+    console.error('Error retrieving repayment records:', error);
+    res.status(500).json({ message: 'Error retrieving repayment records', error: error.message });
   }
 });
 
-// Get a specific repayment record by ID
 app.get('/repayments/:id', async (req, res) => {
+  const repaymentId = req.params.id;
+
   try {
-    const repaymentId = req.params.id;
     const repayment = await repaymentModel.findById(repaymentId);
+
     if (!repayment) {
       return res.status(404).json({ message: 'Repayment record not found' });
     }
-    res.status(200).json({ message: 'Repayment record retrieved', data: repayment });
+
+    res.status(200).json({ message: 'Repayment record retrieved successfully', data: repayment });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to retrieve repayment record', error: error.message });
+    console.error('Error retrieving repayment record:', error);
+    res.status(500).json({ message: 'Error retrieving repayment record', error: error.message });
   }
 });
 
-// Update a repayment record by ID
 app.put('/repayments/:id', async (req, res) => {
   try {
     const repaymentId = req.params.id;
     const {
-      loanId, paymentDate, dueDate, principalAmount, interest, latePenalties,totalAmount
+      loanId, paymentDate, dueDate, principalAmount, interest, latePenalties, totalAmount
     } = req.body;
 
     const updatedRepayment = await repaymentModel.findByIdAndUpdate(repaymentId, {
@@ -715,19 +741,19 @@ app.put('/repayments/:id', async (req, res) => {
   }
 });
 
-// Delete a repayment record by ID
 app.delete('/repayments/:id', async (req, res) => {
+  const repaymentId = req.params.id;
   try {
-    const repaymentId = req.params.id;
     const deletedRepayment = await repaymentModel.findByIdAndDelete(repaymentId);
 
     if (!deletedRepayment) {
       return res.status(404).json({ message: 'Repayment record not found' });
     }
 
-    res.status(200).json({ message: 'Repayment record deleted', data: deletedRepayment });
+    res.status(200).json({ message: 'Repayment record deleted successfully', data: deletedRepayment });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to delete repayment record', error: error.message });
+    console.error('Error deleting repayment record:', error);
+    res.status(500).json({ message: 'Error deleting repayment record', error: error.message });
   }
 });
 
@@ -742,7 +768,7 @@ app.get('/approvedLoans', async (req, res) => {
   }
 });
 
-// Create a new account
+// POST endpoint to create a new account
 app.post('/createaccounts', async (req, res) => {
   try {
     const account = await AccountModel.create(req.body);
@@ -752,30 +778,55 @@ app.post('/createaccounts', async (req, res) => {
   }
 });
 
-// Get all accounts
-app.get('/readaccounts', async (req, res) => {
+// GET endpoint to fetch all accounts
+app.get('/accounts', async (req, res) => {
   try {
-    const accounts = await AccountModel.find();
-    res.json(accounts);
+    const allAccounts = await AccountModel.find();
+
+    res.status(200).json({ message: 'All accounts retrieved successfully', data: allAccounts });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error retrieving accounts:', error);
+    res.status(500).json({ message: 'Error retrieving accounts' });
   }
 });
 
-// Get an account by ID
+// GET endpoint to fetch a specific account by its ID
 app.get('/accounts/:id', async (req, res) => {
+  const accountId = req.params.id;
+
   try {
-    const account = await AccountModel.findById(req.params.id);
+    const account = await AccountModel.findById(accountId);
+
     if (!account) {
-      return res.status(404).json({ error: 'Account not found' });
+      return res.status(404).json({ message: 'Account not found' });
     }
-    res.json(account);
+
+    res.status(200).json({ message: 'Account retrieved successfully', data: account });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error retrieving account:', error);
+    res.status(500).json({ message: 'Error retrieving account' });
   }
 });
 
-// Update an account by ID
+app.get('/accountids', limiter, async (req, res) => {
+  try {
+    const accountNumbers = await AccountModel.find({}, 'accountNumber');
+
+    if (!accountNumbers || accountNumbers.length === 0) {
+      return res.status(404).json({ message: 'No account numbers found' });
+    }
+
+    // Extract accountNumbers from the fetched data
+    const numbers = accountNumbers.map(account => account.accountNumber);
+
+    res.status(200).json({ message: 'Account numbers retrieved successfully', data: numbers });
+  } catch (error) {
+    console.error('Error retrieving account numbers:', error);
+    res.status(500).json({ message: 'Error retrieving account numbers' });
+  }
+});
+
+// PUT endpoint to update an account by its ID
 app.put('/updateaccounts/:id', async (req, res) => {
   try {
     const account = await AccountModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -800,7 +851,7 @@ app.get('/readaccountnumbers', async (req, res) => {
 });
 
 // Delete an account by ID
-app.post('/deleteaccounts/:id', async (req, res) => {
+app.delete('/deleteaccounts/:id', async (req, res) => {
   try {
     const account = await AccountModel.findByIdAndDelete(req.params.id);
     if (!account) {
@@ -812,22 +863,35 @@ app.post('/deleteaccounts/:id', async (req, res) => {
   }
 });
 
+// POST endpoint to create a new transaction
 app.post('/transactions', async (req, res) => {
   try {
     const newTransaction = await TransactionsModel.create(req.body);
     res.status(201).json({ message: 'Transaction created successfully', data: newTransaction });
+
+    // After saving the transaction, update the current balance in the associated account
+    const account = await AccountModel.findOne({ accountNumber: req.body.accountNumber });
+
+    if (account) {
+      await account.updateBalance(req.body.transactionAmount, req.body.debitOrCredit);
+    }
   } catch (error) {
     console.error('Error creating transaction:', error);
     res.status(500).json({ message: 'Error creating transaction' });
   }
 });
 
+// GET endpoint to fetch a specific transaction by its ID
 app.get('/transactions/:id', async (req, res) => {
+  const transactionId = req.params.id;
+
   try {
-    const transaction = await TransactionsModel.findById(req.params.id);
+    const transaction = await TransactionsModel.findById(transactionId);
+
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found' });
     }
+
     res.status(200).json({ message: 'Transaction retrieved successfully', data: transaction });
   } catch (error) {
     console.error('Error retrieving transaction:', error);
@@ -835,15 +899,20 @@ app.get('/transactions/:id', async (req, res) => {
   }
 });
 
+// PUT endpoint to update a transaction by its ID
 app.put('/transactions/:id', async (req, res) => {
+  const transactionId = req.params.id;
+
   try {
-    const updatedTransaction = await TransactionsModel.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedTransaction = await TransactionsModel.findByIdAndUpdate(transactionId, req.body, {
       new: true,
       runValidators: true,
     });
+
     if (!updatedTransaction) {
       return res.status(404).json({ message: 'Transaction not found' });
     }
+
     res.status(200).json({ message: 'Transaction updated successfully', data: updatedTransaction });
   } catch (error) {
     console.error('Error updating transaction:', error);
@@ -851,12 +920,17 @@ app.put('/transactions/:id', async (req, res) => {
   }
 });
 
+// DELETE endpoint to remove a specific transaction by its ID
 app.delete('/transactions/:id', async (req, res) => {
+  const transactionId = req.params.id;
+
   try {
-    const deletedTransaction = await TransactionsModel.findByIdAndDelete(req.params.id);
+    const deletedTransaction = await TransactionsModel.findByIdAndDelete(transactionId);
+
     if (!deletedTransaction) {
       return res.status(404).json({ message: 'Transaction not found' });
     }
+
     res.status(200).json({ message: 'Transaction deleted successfully', data: deletedTransaction });
   } catch (error) {
     console.error('Error deleting transaction:', error);
@@ -1079,6 +1153,39 @@ app.get('/transactionsrep', async (req, res) => {
   } catch (error) {
     console.error('Error fetching transactions:', error);
     res.status(500).json({ error: 'Error fetching transactions' });
+  }
+});
+
+app.get('/account-details', async (req, res) => {
+  try {
+    const { accountNumber } = req.query;
+
+    // Fetch account details based on the provided account number
+    let accounts;
+    if (accountNumber) {
+      accounts = await AccountModel.find({ accountNumber }).lean();
+    } else {
+      accounts = await AccountModel.find({}).lean();
+    }
+
+    // Fetch loan details and populate associated account info
+    const loans = await loansModel.find({}).populate('account', 'accountNumber currentBalance').lean();
+
+    // Construct the table data
+    const tableData = loans.map(loan => {
+      const account = accounts.find(acc => acc._id.toString() === loan.account._id.toString());
+      return {
+        accountNumber: account ? account.accountNumber : 'N/A',
+        balance: account ? account.openingBalance : 'N/A',
+        loanAmount: loan.appliedAmount,
+        currentBalance: loan.account ? loan.account.currentBalance : 'N/A'
+      };
+    });
+
+    res.json(tableData); // Sending the tableData as JSON response to the frontend
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
   }
 });
 

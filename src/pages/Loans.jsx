@@ -1,5 +1,4 @@
 // Loans.jsx
-
 import React, { useState,useEffect } from 'react';
 import { Modal, Button, Form, Table, FormControl } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
@@ -10,7 +9,7 @@ import { parseISO } from 'date-fns';
 const Loans = () => {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    loanId: '',loanProduct: '',borrower: '',
+    loanId: '',account: '', loanProduct: '',borrower: '',
     memberNo: '',releaseDate: new Date(), // Default date
     appliedAmount: '',status: 'Pending',
   });
@@ -20,6 +19,7 @@ const Loans = () => {
   const [filteredLoans, setFilteredLoans] = useState([]);
   const [memberNumbers,setmemberNumbers] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [accountIds, setAccountIds] = useState([]);
 
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => {
@@ -50,127 +50,154 @@ const Loans = () => {
   };
 
   const handleOpenEditModal = async (id) => {
-    console.log(id);
     try {
       const response = await axios.get(`http://localhost:3001/loans/${id}`);
-      const loandata = response.data; // Assuming response.data contains the member data
-      console.log(loandata);
-      loandata.releaseDate = loandata.releaseDate ? parseISO(loandata.releaseDate) : new Date();
-      
-      // Assuming loandata has fields like firstName, lastName, email, etc.
+      const loandata = response.data.data; // Assuming response.data contains the loan data
+  
+      // Destructure loan data
+      const {
+        _id,
+        loanId,
+        account,
+        loanProduct,
+        borrower,
+        memberNo,
+        releaseDate,
+        appliedAmount,
+        status
+      } = loandata;
+  
+      // Adjust the format of the releaseDate
+      const formattedReleaseDate = releaseDate ? parseISO(releaseDate) : new Date();
+  
+      // Set the form data for editing
       setFormData({
-        id: loandata._id,
-        loanId: loandata.loanId,
-        loanProduct: loandata.loanProduct,
-        borrower: loandata.borrower,
-        memberNo: loandata.memberNo,
-        releaseDate: loandata.releaseDate,
-        appliedAmount: loandata.appliedAmount,
-        status: loandata.status,
+        id: _id,
+        loanId,
+        account,
+        loanProduct,
+        borrower,
+        memberNo,
+        releaseDate: formattedReleaseDate,
+        appliedAmount,
+        status,
         // ... Add other fields as necessary based on your form structure
       });
   
       setShowEditModal(true); // Open the edit modal
     } catch (error) {
-      console.error('Error fetching member data:', error);
       // Handle error or display an error message to the user
+      console.error('Error fetching loan data:', error);
     }
   };
+  
   const handleCloseEditModal = () => {
     setShowEditModal(false);
   };
-
-
+  
   const handleDelete = async (id) => {
-    try{
-      const response = axios.post(`http://localhost:3001/deleteloan/${id}`);
-      console.log(response);
-      alert('Delete Success');
-    } 
-    catch (error) {
-      console.log('Failed Delete');
-      alert('Delete Failed');
-    }   
+    try {
+      const response = await axios.delete(`http://localhost:3001/deleteloan/${id}`);
+      // console.log(response);
+      // alert('Delete Success');
+      fetchData(); // Refetch data after deletion
+    } catch (error) {
+      // console.log('Failed Delete');
+      // alert('Delete Failed');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Add new member
-      await axios.post('http://localhost:3001/createloan', formData);
-      // Close modal and reset form data and selected index
+      const { loanId, account, loanProduct, borrower, memberNo, releaseDate, appliedAmount, status } = formData;
+  
+      if (!loanId || !account || !loanProduct || !borrower || !memberNo || !releaseDate || !appliedAmount || !status) {
+        // Ensure all fields are filled in before submitting
+        // Alert or handle this case as required (fields shouldn't be empty)
+        return;
+      }
+  
+      await axios.post('http://localhost:3001/createloan', {
+        loanId,
+        loanProduct,
+        borrower,
+        memberNo,
+        releaseDate,
+        appliedAmount,
+        status,
+        account, // Include accountId in the POST request
+      });
       handleCloseModal();
       setFormData({
         loanId: '',
+        account: '',
         loanProduct: '',
         borrower: '',
         memberNo: '',
-        releaseDate: new Date(), // Default date
+        releaseDate: new Date(),
         appliedAmount: '',
         status: '',
       });
-    
-      alert('Data Entered Successfully');
+      fetchData(); // Refetch data after submission
+    } catch (error) {
+      // Handle errors appropriately, such as displaying an error message
+      // console.error('Error:', error);
       handleCloseModal();
-  } 
-  catch (error) {
-    alert('Check Data Fields for no duplicates');
-    console.error('Error:', error);
-    // Handle error or display an error message to the user
-    handleCloseModal();
-  }
+    }
   };
-
+  
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      // Update existing loan
-      console.log(formData);
       await axios.put(`http://localhost:3001/updateloan/${formData.id}`, formData);
-      // Reset form data and close modal after successful update
       setFormData({
         loanId: '',
+        account: '',
         loanProduct: '',
         borrower: '',
         memberNo: '',
-        releaseDate: new Date(), // Default date
+        releaseDate: new Date(),
         appliedAmount: '',
         status: '',
       });
-      alert('Data Updated Successfully');
-      handleCloseModal();
+      // alert('Data Updated Successfully');
+      handleCloseEditModal();
+      fetchData(); // Refetch data after update
     } catch (error) {
-      alert('Failed to update loan. Please check the data fields.');
-      console.error('Error:', error);
-      // Handle error or display an error message to the user
-      handleCloseModal();
+      // alert('Failed to update loan. Please check the data fields.');
+      // console.error('Error:', error);
+      // handleCloseEditModal();
+    }
+  };
+
+  // Function to fetch data
+  const fetchData = async () => {
+    try {
+      const loansResponse = await axios.get('http://localhost:3001/loans');
+      const fetchedLoans = loansResponse.data.data;
+      setLoansData(fetchedLoans);
+
+      const membersResponse = await axios.get('http://localhost:3001/loanmembers');
+      const memberNumbers = membersResponse.data.data;
+      setmemberNumbers(memberNumbers);
+
+      const response = await axios.get('http://localhost:3001/accountids');
+      setAccountIds(response.data.data);
+      // console.log(response);
+    } catch (error) {
+      // console.error('Error fetching data:', error);
+      // Handle error or display an error message
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch loans data from the server
-        const response = await axios.get('http://localhost:3001/loans');
-        const fetchedLoans = response.data.data; // Assuming loans are nested inside 'data' field
-        console.log('Fetched Loans',fetchedLoans);
-        setLoansData(fetchedLoans);
-      } catch (error) {
-        console.error('Error fetching loans:', error);
-        // Handle error or display an error message to the user
-      }
-      const response = await axios.get('http://localhost:3001/loans/members')
-      .then(response => {
-        console.log('Member Number Status:',response);
-        setmemberNumbers(response.data.data);
-      })
-      .catch(error => console.log('Error Fetching Member Numbers'))  
-    };
-    fetchData(); // Fetch loans data when the component mounts
-  }, []); // The empty dependency array ensures the effect runs only once on mount
-
+    // Fetch data initially on component mount
+    fetchData();
+  }, []);
+  
   useEffect(() => {
-    console.log('Loans Data',loansData);
+    // console.log('Loans Data',loansData);
     // Filter loans based on search term
     const x = loansData.filter((loan) =>
       Object.values(loan).some(
@@ -180,7 +207,7 @@ const Loans = () => {
       )
     );
     const filteredLoans = setFilteredLoans(x);
-    console.log('Filtered loans:', filteredLoans);
+    // console.log('Filtered loans:', filteredLoans);
   }, [searchTerm, loansData]);
 
   return (
@@ -214,6 +241,22 @@ const Loans = () => {
                 onChange={handleInputChange}
               />
             </Form.Group>
+            <Form.Group controlId="formAccountId">
+            <Form.Label>Account ID</Form.Label>
+            <Form.Control
+              as="select"
+              name="account"
+              value={formData.account}
+              onChange={handleInputChange}
+            >
+              <option value="">Select Account ID</option>
+              {accountIds.map((accountId) => (
+                <option key={accountId} value={accountId}>
+                  {accountId}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
             <Form.Group controlId="formLoanProduct">
               <Form.Label>Loan Product</Form.Label>
               <Form.Control
@@ -320,6 +363,7 @@ const Loans = () => {
                 name="id"
                 value={formData.id}
                 onChange={handleInputChange}
+                readOnly
               />
             </Form.Group>
             <Form.Group controlId="formLoanId">
@@ -332,6 +376,22 @@ const Loans = () => {
                 onChange={handleInputChange}
               />
             </Form.Group>
+            <Form.Group controlId="formAccountId">
+          <Form.Label>Account ID</Form.Label>
+          <Form.Control
+            as="select"
+            name="accountId"
+            value={formData.accountId}
+            onChange={handleInputChange}
+          >
+            <option value="">Select Account ID</option>
+            {accountIds.map((accountId) => (
+              <option key={accountId} value={accountId}>
+                {accountId}
+              </option>
+            ))}
+          </Form.Control>
+        </Form.Group>
             <Form.Group controlId="formLoanProduct">
               <Form.Label>Loan Product</Form.Label>
               <Form.Control
@@ -429,6 +489,7 @@ const Loans = () => {
           <tr>
             <th>Unique Table ID</th>
             <th>Loan ID</th>
+            <th>Account ID</th>
             <th>Loan Product</th>
             <th>Borrower</th>
             <th>Member No</th>
@@ -444,6 +505,7 @@ const Loans = () => {
           <tr key={loan._id}>
           <td>{loan._id}</td>
           <td>{loan.loanId}</td>
+          <td>{loan.account}</td>
           <td>{loan.loanProduct}</td>
           <td>{loan.borrower}</td>
           <td>{loan.memberNo}</td>

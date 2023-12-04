@@ -27,7 +27,7 @@ const Branches = () => {
     try {
       const response = await axios.get(`http://localhost:3001/getbranch/${id}`);
       const selectedMemberData = response.data; // Assuming response.data contains the member data
-      console.log(selectedMemberData);
+      // console.log(selectedMemberData);
       // Set the form data to the retrieved member's data
       // Set the form data to the retrieved member's data
       setFormData({
@@ -71,16 +71,15 @@ const Branches = () => {
       // Add new member
       setMembersData((prevData) => [...prevData, formData]);
       // Axios Create request here for posting data (Posting Correctly)
-      console.log(formData);
+      // console.log(formData);
       try {      
         const response =  await axios.post('http://localhost:3001/createbranch',formData);
-        console.log('Data Successfully entered in Backend Server',formData);
-        // Show success alert for add
-        setAlertVariant('success');
-        setShowAlert(true);      
+        // console.log('Data Successfully entered in Backend Server',formData);
+        // alert('success!');
+        fetchData();
       } catch (error) {
         console.log('Some Error in submitting the form data to backend');
-        setAlertVariant('failed');
+        // alert('failed');
         setShowAlert(true);
       }
     }
@@ -99,38 +98,29 @@ const Branches = () => {
     console.log(id);
     try {
       // Update member
-      console.log(formData);
+      // console.log(formData);
       const response = await axios.put(`http://localhost:3001/updatebranch/${formData._id}`, formData);
-      console.log(response.data);
-
-      // Show success alert for update
-      setAlertVariant('success');
-      setShowAlert(true);
-
+      // console.log(response.data);
       // Close the edit modal
       handleCloseEditModal();
+      fetchData();
     } catch (error) {
       console.error('Error updating data:', error);
       // Show failure alert for update
-      setAlertVariant('failed');
-      setShowAlert(true);
     }
   };
 
   const handleDelete = async (id) => {
     try {
       const response = await axios.post(`http://localhost:3001/deletebranch/${id}`);
-      console.log(response.data);
-  
+      // console.log(response.data);
       // Show success alert for delete
-      setAlertVariant('success');
-      setShowAlert(true);
+      fetchData();
     } catch (error) {
       console.error('Error in deleting data:', error);
   
       // Show error alert for delete
-      setAlertVariant('failed');
-      setShowAlert(true);
+      alert('failed');
     }
   };
   
@@ -138,34 +128,26 @@ const Branches = () => {
     setSearchTerm(e.target.value);
   };
 
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/readbranch');
+      const { data } = response.data; // Extract 'data' array from the response
+
+      // Filter the 'data' array based on searchTerm
+      const filteredData = data.filter((member) =>
+        member.branchName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      // Update filteredMembers state with the filtered data
+      setFilteredMembers(filteredData);
+    } catch (error) {
+      console.error('Error while fetching data:', error);
+      // Handle the error or show an error message to the user
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/readbranch');
-        const { data } = response.data; // Extract 'data' array from the response
-
-        // Filter the 'data' array based on searchTerm
-        const filteredData = data.filter((member) =>
-          member.branchName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-        // Update filteredMembers state with the filtered data
-        setFilteredMembers(filteredData);
-      } catch (error) {
-        console.error('Error while fetching data:', error);
-        // Handle the error or show an error message to the user
-      }
-    };
-
     fetchData(); // Call fetchData initially when the component mounts
-
-    const interval = setInterval(() => {
-      fetchData(); // Fetch data every 10 seconds
-    }, 10000);
-
-    return () => {
-      clearInterval(interval); // Clean up the interval on component unmount
-    };
   }, [searchTerm]);
 
   return (
@@ -308,10 +290,6 @@ const Branches = () => {
           </Form>
         </Modal.Body>
       </Modal>
-
-      <Alert show={showAlert} variant={alertVariant} onClose={() => setShowAlert(false)} dismissible>
-        {alertVariant === 'success' ? 'Success! Operation completed.' : 'Error! Something went wrong.'}
-      </Alert>
 
       <Table striped bordered hover className="mt-4">
         <thead>

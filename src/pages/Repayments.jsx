@@ -46,45 +46,40 @@ const Repayments = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    try {
-      const response = await axios.post('http://localhost:3001/createrepayments', formData);
-      console.log('Data Successfully entered in Backend Server', response.data.data);
-      // Show success alert for add
-      alert('success');
+    try {  
+      const response = await axios.post('http://localhost:3001/repayments', formData);
+      // console.log('Data Successfully entered in Backend Server', response.data.data);
+      formData();
       handleCloseModal();
     } catch (error) {
-      console.log('Some Error in submitting the form data to backend:', error);
-      alert('failed');
-      handleCloseModal();
+      // console.error('Some Error in submitting the form data to backend:', error);
+      // handleCloseModal();
+    }
+  };
+  
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/repayments');
+      setRepaymentsData(response.data.data);
+    } catch (error) {
+      // console.error('Error fetching repayments:', error);
+      // Handle error or display an error message to the user
+    }
+    try {
+      const response = await axios.get('http://localhost:3001/approvedLoans');
+      const data = response.data.data;
+      setApprovedLoanIds(data);
+      // console.log('Approved Loan Id',data);
+    } catch (error) {
+      // console.error('Error fetching approved loan IDs:', error);
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/readrepayments');
-        setRepaymentsData(response.data.data);
-      } catch (error) {
-        console.error('Error fetching repayments:', error);
-        // Handle error or display an error message to the user
-      }
-    };
-
-    const fetchApprovedLoanIds = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/approvedLoans');
-        const data = response.data.data;
-        setApprovedLoanIds(data);
-        console.log('Approved Loan Id',data);
-      } catch (error) {
-        console.error('Error fetching approved loan IDs:', error);
-      }
-    };
-
-    fetchApprovedLoanIds();
-    fetchData(); // Fetch repayment data when the component mounts
+    // Fetch data initially on component mount
+    fetchData();
   }, []);
+  
 
   useEffect(() => {
     const filteredRepayments = repaymentsData.filter((repayment) =>

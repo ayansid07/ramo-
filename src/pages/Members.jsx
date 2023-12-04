@@ -49,7 +49,7 @@ const Members = () => {
     try {
       const response = await axios.get(`http://localhost:3001/getmember/${id}`);
       const memberData = response.data; // Assuming response.data contains the member data
-      console.log(memberData);
+      // console.log(memberData);
       // Assuming memberData has fields like firstName, lastName, email, etc.
       setUpdateData({
         id: memberData._id,
@@ -63,7 +63,7 @@ const Members = () => {
   
       setShowEditModal(true); // Open the edit modal
     } catch (error) {
-      console.error('Error fetching member data:', error);
+      // console.error('Error fetching member data:', error);
       // Handle error or display an error message to the user
     }
   };
@@ -73,31 +73,31 @@ const Members = () => {
     setSelectedMemberIndex(null);
   };
 
+  const fetchData = async () => {
+    try {
+      const branchNamesResponse = await axios.get('http://localhost:3001/branches/names');
+      setBranchNames(branchNamesResponse.data.data);
+  
+      const membersResponse = await axios.get('http://localhost:3001/readmembers');
+      const { data } = membersResponse.data;
+  
+      if (Array.isArray(data)) {
+        setMembersData(data);
+      } else if (typeof data === 'object') {
+        const dataArray = [data];
+        setMembersData(dataArray);
+      } else {
+        // console.error('Invalid format for members data:', data);
+      }
+    } catch (error) {
+      // console.error('Error fetching data:', error);
+    }
+  };
+  
   useEffect(() => {
-    axios.get('http://localhost:3001/branches/names')
-      .then(response => {
-        setBranchNames(response.data.data);
-      })
-      .catch(error => console.error('Error fetching branch names:', error));
-
-    // Fetch members data
-    axios.get('http://localhost:3001/readmembers')
-      .then(response => {
-        const { data } = response.data; // Destructure the 'data' field from the response
-
-        if (Array.isArray(data)) {
-          setMembersData(data); // If it's already an array, set it directly
-        } else if (typeof data === 'object') {
-          // If it's an object (JSON), convert it to an array
-          const dataArray = [data]; // Wrap single object in an array
-          setMembersData(dataArray);
-        } else {
-          console.error('Invalid format for members data:', data);
-        }
-      })
-      .catch(error => console.error('Error fetching members data:', error));
-    },[]);
-
+    fetchData();
+  }, []);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -112,11 +112,12 @@ const Members = () => {
           email: '',
           branchName: '',
         });
-        alert('Data Entered Successfully');
+        // alert('Data Entered Successfully');
+        fetchData();
     } 
     catch (error) {
-      alert('Check Data Fields for no duplicates');
-      console.error('Error:', error);
+      // alert('Check Data Fields for no duplicates');
+      // console.error('Error:', error);
       // Handle error or display an error message to the user
     }
   };
@@ -125,16 +126,17 @@ const Members = () => {
     e.preventDefault()
     try {
       // Update member
-      console.log(updateData);
+      // console.log(updateData);
       const response = await axios.put(`http://localhost:3001/updatemember/${updateData.id}`, updateData);
-      console.log(response.data);
-      alert('Successfully Updated');
+      // console.log(response.data);
+      // alert('Successfully Updated');
       // Close the edit modal
       handleCloseEditModal();
+      fetchData();
     } catch (error) {
       console.error('Error updating data:', error);
       // Show failure alert for update
-      alert('Update Failed');
+      // alert('Update Failed');
     }
   };
 
@@ -142,11 +144,12 @@ const Members = () => {
     try{
       const response = axios.post(`http://localhost:3001/deletemember/${id}`);
       console.log(response);
-      alert('Delete Success');
+      // alert('Delete Success');
+      fetchData();
     } 
     catch (error) {
-      console.log('Failed Delete');
-      alert('Delete Failed');
+      // console.log('Failed Delete');
+      // alert('Delete Failed');
     }   
   };
 

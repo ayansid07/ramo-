@@ -37,9 +37,8 @@ const Accounts = () => {
   const handleOpenEditModal = async (id) => {
     try {
       const response = await axios.get(`http://localhost:3001/accounts/${id}`);
-      const accountData = response.data; // Assuming response.data contains the account data
-      console.log(accountData);
-      console.log(id);
+      const accountData = response.data.data; // Assuming response.data contains the account data
+      
       setFormData({
         id: accountData._id,
         accountNumber: accountData.accountNumber,
@@ -52,11 +51,11 @@ const Accounts = () => {
   
       setShowEditModal(true); // Open the edit modal
     } catch (error) {
-      console.error('Error fetching account data:', error);
+      // console.error('Error fetching account data:', error);
       // Handle error or display an error message to the user
     }
-  };  
-
+  };
+  
   const handleCloseEditModal = () => {
     setShowEditModal(false);
   };
@@ -70,82 +69,67 @@ const Accounts = () => {
   };
 
   const handleDelete = async (id) => {
-    try{
-      console.log(id);
-      const response = axios.post(`http://localhost:3001/deleteaccounts/${id}`);
-      console.log(response);
-      alert('Delete Success');
-    } 
-    catch (error) {
-      console.log('Failed Delete');
-      alert('Delete Failed');
-    }   
+    try {
+      const response = await axios.delete(`http://localhost:3001/deleteaccounts/${id}`);
+      // console.log(response);
+      // alert('Delete Success');
+      fetchData(); // Fetch data after successful deletion
+    } catch (error) {
+      // console.error('Failed Delete:', error);
+      // alert('Delete Failed');
+    }
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      // Update existing loan
-      console.log(formData);
+      // console.log(formData);
       await axios.put(`http://localhost:3001/updateaccounts/${formData.id}`, formData);
-      // Reset form data and close modal after successful update
-      setFormData({
-        accountNumber: '',
-        member: '',
-        accountType: '',
-        status: '',
-        openingBalance: 0,
-        });
-      alert('Data Updated Successfully');
-      handleCloseModal();
+      // alert('Data Updated Successfully');
+      fetchData(); // Fetch data after successful update
+      handleCloseEditModal();
     } catch (error) {
-      alert('Failed to update loan. Please check the data fields.');
-      console.error('Error:', error);
-      // Handle error or display an error message to the user
-      handleCloseModal();
+      // alert('Failed to update account. Please check the data fields.');
+      // console.error('Error:', error);
+      handleCloseEditModal();
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Add new member
       await axios.post('http://localhost:3001/createaccounts', formData);
-      // Close modal and reset form data and selected index
-      handleCloseModal();
-      setFormData({
-        accountNumber: '',
-        member: '',
-        accountType: '',
-        status: '',
-        openingBalance: 0,
-      });
-      alert('Data Entered Successfully');
+      // alert('Data Entered Successfully');
+      fetchData(); // Fetch data after successful addition
+      handleCloseEditModal();
     } catch (error) {
-      alert('Check Data Fields for no duplicates');
-      console.error('Error:', error);
-      // Handle error or display an error message to the user
-    }    
-    handleCloseModal();
+      // alert('Check Data Fields for no duplicates');
+      // console.error('Error:', error);
+    }
   };
 
-  useEffect( async () => {
-    // Fetch accounts data from an API endpoint using Axios
-    axios.get('http://localhost:3001/readaccounts')
-      .then(response => {
-        setAccountsData(response.data); // Set fetched data to accountsData
-      })
-      .catch(error => {
-        console.error('Error fetching accounts:', error);
-      });
-
+  const fetchData = async () => {
+    try {
+      // Fetch accounts data
+      const response = await axios.get('http://localhost:3001/accounts');
+      setAccountsData(response.data.data); // Assuming response.data contains the account data
+    } catch (error) {
+      console.error('Error fetching accounts:', error);
+      // Handle error or display an error message to the user
+    }
     const response = await axios.get('http://localhost:3001/readmembersname')
     .then(response => {
-      console.log('Member Name Status:',response);
+      // console.log('Member Name Status:',response);
       setMembersData(response.data.data);
     })
     .catch(error => console.log('Error Fetching Member Numbers'));   
 
+  };
+
+  useEffect(() => {
+    // Fetch accounts data initially
+    fetchData();
+    // ... Rest of your useEffect code remains the same
   }, []); // Run once on component mount
 
   useEffect(() => {
@@ -267,6 +251,7 @@ const Accounts = () => {
                 name="id"
                 value={formData.id}
                 onChange={handleInputChange}
+                readOnly
               />
             </Form.Group>
             <Form.Group controlId="formAccountNumber">
