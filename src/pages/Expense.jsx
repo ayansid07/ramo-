@@ -17,29 +17,22 @@ const Expense = () => {
   const [categories, setCategories] = useState([]);
 
   // Simulating API call to fetch categories
-  useEffect(() => {
     // Replace 'your-categories-api-endpoint' with the actual API endpoint for categories
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('your-categories-api-endpoint');
-        const data = await response.json();
-        setCategories(data); // Assuming data is an array of categories
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-
-    const fetchExpenses = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/expenses'); // Replace with your expenses endpoint
-        setExpenses(response.data); // Assuming the response data contains an array of expenses
+        // const response = await fetch('your-categories-api-endpoint');
+        // const data = await response.json();
+        // setCategories(data); // Assuming data is an array of categories
+        
+        const response1 = await axios.get('http://localhost:3001/expenses'); // Replace with your expenses endpoint
+        setExpenses(response1.data); // Assuming the response data contains an array of expenses
       } catch (error) {
         console.error('Error fetching expenses:', error);
       }
     };
 
-    fetchExpenses();
-    fetchCategories();
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const handleInputChange = (e) => {
@@ -77,7 +70,7 @@ const Expense = () => {
       const response = await axios.post('http://localhost:3001/expenses', formData);
 
       const data = await response.json();
-      console.log('Expense created:', data); // Log the response from the server
+      // console.log('Expense created:', data); // Log the response from the server
       
       // Reset form fields after successful submission if needed
       setFormData({
@@ -87,11 +80,11 @@ const Expense = () => {
         reference: '',
         note: '',
       });
-
+      fetchData();
     } catch (error) {
-      console.error('Error creating Expense:', error);
+      // console.error('Error creating Expense:', error);
     }
-    console.log(formData);
+    // console.log(formData);
     handleModalClose();
   };
 

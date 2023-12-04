@@ -11,7 +11,7 @@ const AccountStatement = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/transactionsrep`, {
+      const response = await axios.get(`http://localhost:3001/accountstatement`, {
         params: {
           accountNumber,
           startDate,
@@ -20,7 +20,7 @@ const AccountStatement = () => {
       });
   
       if (response.status === 200) {
-        const transactionsData = response.data?.transactions || []; // Access transactions data, handle undefined case
+        const transactionsData = response.data || [];
         setTransactions(transactionsData);
       } else {
         console.error('Failed to fetch data');
@@ -92,22 +92,22 @@ const AccountStatement = () => {
             </tr>
           </thead>
           <tbody>
-          {transactions.length > 0 ? (
-            transactions.map((transaction, index) => (
-              <tr key={index}>
-                <td>{transaction.Date}</td>
-                <td>{transaction.Description}</td>
-                <td>{transaction.Debit}</td>
-                <td>{transaction.Credit}</td>
-                <td>{transaction.Balance}</td>
+            {transactions.length > 0 ? (
+              transactions.map((transaction, index) => (
+                <tr key={index}>
+                  <td>{transaction.Date}</td>
+                  <td>{transaction.Description}</td>
+                  <td>{transaction.Debit}</td>
+                  <td>{transaction.Credit}</td>
+                  <td>{transaction.Balance}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">{transactions.length === 0 ? 'No transactions found' : 'Loading...'}</td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5">{transactions.length === 0 ? 'No transactions found' : 'Loading...'}</td>
-            </tr>
-          )}
-            </tbody>
+            )}
+          </tbody>
         </Table>
       </div>
     </div>

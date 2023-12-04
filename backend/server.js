@@ -1173,6 +1173,47 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   return res.status(200).json({ filePath });
 });
 
+app.get('/accountstatement', async (req, res) => {
+  try {
+    const { startDate, endDate, accountNumber } = req.query;
+
+    // Convert start and end dates to JavaScript Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Fetch transactions based on the provided criteria
+    const transactions = await TransactionsModel.find({
+      date: { $gte: start, $lte: end },
+      accountNumber: accountNumber
+    }, 'date description transactionAmount debitOrCredit currentBalancemoment');
+    
+    // Format the transactions to match the required response format
+    const formattedTransactions = transactions.map(transaction => {
+      let debit = 0;
+      let credit = 0;
+
+      if (transaction.debitOrCredit === 'Debit') {
+        debit = transaction.transactionAmount;
+      } else if (transaction.debitOrCredit === 'Credit') {
+        credit = transaction.transactionAmount;
+      }
+
+      return {
+        Date: transaction.date,
+        Description: transaction.description,
+        Debit: debit,
+        Credit: credit,
+        Balance: transaction.currentBalancemoment // Assuming this field contains the calculated balance
+      };
+    });
+
+    // Return the formatted data
+    res.status(200).json(formattedTransactions);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch transactions', error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

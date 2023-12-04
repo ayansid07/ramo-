@@ -24,13 +24,13 @@ const Transaction = () => {
       try {
         const memberResponse = await axios.get('http://localhost:3001/readmemberids');
         setMembers(memberResponse.data.data);
-        console.log('Member IDs Status:', memberResponse);
+        // console.log('Member IDs Status:', memberResponse);
 
         const accountResponse = await axios.get('http://localhost:3001/readaccountnumbers');
         setAccounts(accountResponse.data);
-        console.log('Account Numbers Status:', accountResponse);
+        // console.log('Account Numbers Status:', accountResponse);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        // console.error('Error fetching data:', error);
       }
     };
 

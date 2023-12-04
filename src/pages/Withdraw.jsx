@@ -22,7 +22,7 @@ const Withdraw = () => {
       try {
         const memberResponse = await axios.get('http://localhost:3001/readmemberids');
         setMembers(memberResponse.data.data);
-        console.log('Member IDs Status:', memberResponse);
+        // console.log('Member IDs Status:', memberResponse);
 
         const accountResponse = await axios.get('http://localhost:3001/readaccountnumbers');
         setAccounts(accountResponse.data);

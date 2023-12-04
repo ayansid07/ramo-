@@ -31,8 +31,9 @@ const User = () => {
         status: userData.status,
         image: userData.image, // Reset image in the form
       });
+      fetchData();
     } catch (error) {
-      console.error('Error fetching user data for edit:', error);
+      // console.error('Error fetching user data for edit:', error);
       // Handle error or display an error message to the user
     }
   };
@@ -73,7 +74,7 @@ const User = () => {
         },
       });
   
-      console.log('User updated:', response.data);
+      // console.log('User updated:', response.data);
       
       // Clear the form data state after successful update
       setFormData({
@@ -88,8 +89,9 @@ const User = () => {
       setShowEditModal(false);
       // Perform necessary actions after successful update
       // fetchUserData(); // Assuming you have a function to fetch user data
+      fetchData();
     } catch (error) {
-      console.error('Error updating user:', error.response?.data);
+      // console.error('Error updating user:', error.response?.data);
       // Handle error or display an error message to the user
     }
   };
@@ -128,42 +130,44 @@ const User = () => {
         },
       });
   
-      console.log('User created:', response.data);
+      // console.log('User created:', response.data);
       // Clear the formDataForApi after successful submission
       formDataForApi.forEach((value, key) => {
       formDataForApi.delete(key);
-    });
+      });
+
       handleCloseModal();
+      fetchData();
     } catch (error) {
-      console.error('Error creating user:', error);
+      // console.error('Error creating user:', error);
       // Handle error or display an error message to the user
     }
   };
 
-  useEffect(() => {
     // Function to fetch user data from the backend
-    const fetchUserData = async () => {
+    const fetchData = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/users'); // Replace with your API endpoint
         setUsersData(response.data); // Update usersData state with the fetched data
       } catch (error) {
-        console.error('Error fetching users:', error);
+        // console.error('Error fetching users:', error);
         // Handle error or display an error message to the user
       }
     };
 
+  useEffect(() => {
     // Call the function to fetch user data when the component mounts
-    fetchUserData();
+    fetchData();
   }, []); // Run once on component mount
 
   const handleDelete = async (userId) => {
     try {
       // Make an Axios DELETE request to the API endpoint to delete the image
       const response = await axios.delete(`http://localhost:3001/api/users/${userId}`);
-      console.log('Entry deleted:', response.data);
+      // console.log('Entry deleted:', response.data);
   
     } catch (error) {
-      console.error('Error:', error);
+      // console.error('Error:', error);
       // Handle error or display an error message to the user
     }
   };
