@@ -9,7 +9,7 @@ const Withdraw = () => {
     date: '',
     member: '',
     accountNumber: '',
-    amount: '',
+    transactionAmount: '',
     debitOrCredit: 'Debit',
     status: '',
     description: '',
@@ -18,8 +18,7 @@ const Withdraw = () => {
   const [members, setMembers] = useState([]);
   const [accounts, setAccounts] = useState([]);
 
-  useEffect(  () => {
-    const fetchData = async () => {
+  const fetchData = async () => {
       try {
         const memberResponse = await axios.get('http://localhost:3001/readmemberids');
         setMembers(memberResponse.data.data);
@@ -27,12 +26,13 @@ const Withdraw = () => {
 
         const accountResponse = await axios.get('http://localhost:3001/readaccountnumbers');
         setAccounts(accountResponse.data);
-        console.log('Account Numbers Status:', accountResponse);
+        // console.log('Account Numbers Status:', accountResponse);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        // console.error('Error fetching data:', error);
       }
     };
-
+  
+    useEffect(  () => {
     fetchData();
   }, []); // Empty dependency array ensures this runs only once on component mount
 
@@ -57,23 +57,23 @@ const Withdraw = () => {
       });
 
       const data = await response.json();
-      console.log('Transaction created:', data); // Log the response from the server
+      // console.log('Transaction created:', data); // Log the response from the server
       
       // Reset form fields after successful submission if needed
       setFormData({
         date: '',
         member: '',
         accountNumber: '',
-        amount: '',
+        transactionAmount: '',
         debitOrCredit: 'Debit',
         status: '',
         description: ''
       });
 
     } catch (error) {
-      console.error('Error creating transaction:', error);
+      // console.error('Error creating transaction:', error);
     }
-    console.log(formData);
+    // console.log(formData);
   };
 
   return (
@@ -131,8 +131,8 @@ const Withdraw = () => {
           <Form.Control
           className="custom-form-control"
             type="number"
-            name="amount"
-            value={formData.amount}
+            name="transactionAmount"
+            value={formData.transactionAmount}
             onChange={handleInputChange}
             required
           />

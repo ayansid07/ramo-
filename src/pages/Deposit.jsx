@@ -8,7 +8,7 @@ const Deposit = () => {
     date: '',
     member: '',
     accountNumber: '',
-    amount: '',
+    transactionAmount: '',
     debitOrCredit: 'Credit',
     status: '',
     description: ''
@@ -17,21 +17,21 @@ const Deposit = () => {
   const [members, setMembers] = useState([]);
   const [accounts, setAccounts] = useState([]);
 
+  const fetchData = async () => {
+    try {
+      const memberResponse = await axios.get('http://localhost:3001/readmemberids');
+      setMembers(memberResponse.data.data);
+      // console.log('Member IDs Status:', memberResponse);
+
+      const accountResponse = await axios.get('http://localhost:3001/readaccountnumbers');
+      setAccounts(accountResponse.data);
+      // console.log('Account Numbers Status:', accountResponse);
+    } catch (error) {
+      // console.error('Error fetching data:', error);
+    }
+  };
+
   useEffect(  () => {
-    const fetchData = async () => {
-      try {
-        const memberResponse = await axios.get('http://localhost:3001/readmemberids');
-        setMembers(memberResponse.data.data);
-        console.log('Member IDs Status:', memberResponse);
-
-        const accountResponse = await axios.get('http://localhost:3001/readaccountnumbers');
-        setAccounts(accountResponse.data);
-        console.log('Account Numbers Status:', accountResponse);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
     fetchData();
   }, []); // Empty dependency array ensures this runs only once on component mount
 
@@ -58,21 +58,21 @@ const Deposit = () => {
       });
 
       const data = await response.json();
-      console.log('Transaction created:', data); // Log the response from the server
+      // console.log('Transaction created:', data); // Log the response from the server
       
       // Reset form fields after successful submission if needed
       setFormData({
         date: '',
         member: '',
         accountNumber: '',
-        amount: '',
+        transactionAmount: '',
         debitOrCredit: 'Credit',
         status: '',
         description: ''
       });
-
+      fetchData();
     } catch (error) {
-      console.error('Error creating transaction:', error);
+      // console.error('Error creating transaction:', error);
     }
   };
 
@@ -127,13 +127,13 @@ const Deposit = () => {
               ))}
             </Form.Control>
           </Form.Group>
-        <Form.Group controlId="amount">
+        <Form.Group controlId="transactionAmount">
           <Form.Label className="custom-form-label">Amount *</Form.Label>
           <Form.Control
           className="custom-form-control"
             type="number"
-            name="amount"
-            value={formData.amount}
+            name="transactionAmount"
+            value={formData.transactionAmount}
             onChange={handleInputChange}
             required
           />

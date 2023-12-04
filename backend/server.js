@@ -101,19 +101,11 @@ const accountSchema = new mongoose.Schema({
   currentBalance: { type: Number, required: true, default: 0 }
 }, { collection: 'accounts' });
 
-accountSchema.methods.updateBalance = async function (transactionAmount, debitOrCredit) {
-  if (debitOrCredit === 'Debit') {
-    this.currentBalance -= transactionAmount;
-  } else if (debitOrCredit === 'Credit') {
-    this.currentBalance += transactionAmount;
-  }
-  await this.save();
-};
-
 const transactionSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   member: { type: String, required: true },
   accountNumber: { type: String, required: true },
+  currentBalancemoment: {type: Number,required: true},
   transactionAmount: { type: Number, required: true },
   debitOrCredit: { type: String, enum: ['Debit', 'Credit'], required: true },
   status: { type: String, required: true },
@@ -866,18 +858,81 @@ app.delete('/deleteaccounts/:id', async (req, res) => {
 // POST endpoint to create a new transaction
 app.post('/transactions', async (req, res) => {
   try {
-    const newTransaction = await TransactionsModel.create(req.body);
-    res.status(201).json({ message: 'Transaction created successfully', data: newTransaction });
+    const {
+      date,
+      member,
+      accountNumber,
+      currentBalancemoment,
+      transactionAmount,
+      debitOrCredit,
+      status,
+      description
+    } = req.body;
 
-    // After saving the transaction, update the current balance in the associated account
-    const account = await AccountModel.findOne({ accountNumber: req.body.accountNumber });
-
-    if (account) {
-      await account.updateBalance(req.body.transactionAmount, req.body.debitOrCredit);
+    // Validate the status provided in the request
+    const validStatuses = ['Completed', 'Pending', 'Cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status provided' });
     }
+
+    // Find the corresponding account using accountNumber
+    const account = await AccountModel.findOne({ accountNumber });
+
+    if (!account) {
+      return res.status(404).json({ message: 'Account not found' });
+    }
+    
+    // Create a new transaction instance
+    const newTransaction = new TransactionsModel({
+      date,
+      member,
+      accountNumber,
+      currentBalancemoment,
+      transactionAmount,
+      debitOrCredit,
+      status,
+      description
+    });
+
+    // console.log('Current Balance:', account.currentBalance);
+    // console.log('transacation amount:', transactionAmount);
+    // // Before updating the balance, validate account.currentBalance is a valid number
+    if (typeof account.currentBalance !== 'number' || isNaN(account.currentBalance)) {
+      return res.status(400).json({ message: 'Invalid currentBalance value in the account' });
+    }
+
+    // Check if the transaction status is 'completed' to update the account balance
+    if (status === 'Completed') {
+      // Update the account balance based on the transaction type (Debit/Credit)
+      if (debitOrCredit === 'Debit') {
+        account.currentBalance -= parseFloat(transactionAmount);
+      } else if (debitOrCredit === 'Credit') {
+        account.currentBalance += parseFloat(transactionAmount);
+      }
+
+      // Save the updated account balance
+      await account.save();
+    }
+    
+    newTransaction.currentBalancemoment = account.currentBalance;
+
+    // Save the transaction details
+    const savedTransaction = await newTransaction.save();
+    res.status(200).json({ message: 'Transaction created', data: savedTransaction });
   } catch (error) {
-    console.error('Error creating transaction:', error);
-    res.status(500).json({ message: 'Error creating transaction' });
+    res.status(500).json({ message: 'Failed to create transaction', error: error.message });
+  }
+});
+
+// GET endpoint to fetch all transactions
+app.get('/transactions', async (req, res) => {
+  try {
+    const allTransactions = await TransactionsModel.find();
+
+    res.status(200).json({ message: 'All transactions retrieved successfully', data: allTransactions });
+  } catch (error) {
+    console.error('Error retrieving transactions:', error);
+    res.status(500).json({ message: 'Error retrieving transactions' });
   }
 });
 
@@ -899,6 +954,24 @@ app.get('/transactions/:id', async (req, res) => {
   }
 });
 
+// Delete endpoint to remove a specific transaction by its ID
+app.delete('/transactions/:id', async (req, res) => {
+  const transactionId = req.params.id;
+
+  try {
+    const deletedTransaction = await TransactionsModel.findByIdAndDelete(transactionId);
+
+    if (!deletedTransaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+
+    res.status(200).json({ message: 'Transaction deleted successfully', data: deletedTransaction });
+  } catch (error) {
+    console.error('Error deleting transaction:', error);
+    res.status(500).json({ message: 'Error deleting transaction' });
+  }
+});
+
 // PUT endpoint to update a transaction by its ID
 app.put('/transactions/:id', async (req, res) => {
   const transactionId = req.params.id;
@@ -917,24 +990,6 @@ app.put('/transactions/:id', async (req, res) => {
   } catch (error) {
     console.error('Error updating transaction:', error);
     res.status(500).json({ message: 'Error updating transaction' });
-  }
-});
-
-// DELETE endpoint to remove a specific transaction by its ID
-app.delete('/transactions/:id', async (req, res) => {
-  const transactionId = req.params.id;
-
-  try {
-    const deletedTransaction = await TransactionsModel.findByIdAndDelete(transactionId);
-
-    if (!deletedTransaction) {
-      return res.status(404).json({ message: 'Transaction not found' });
-    }
-
-    res.status(200).json({ message: 'Transaction deleted successfully', data: deletedTransaction });
-  } catch (error) {
-    console.error('Error deleting transaction:', error);
-    res.status(500).json({ message: 'Error deleting transaction' });
   }
 });
 

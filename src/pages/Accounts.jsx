@@ -31,6 +31,7 @@ const Accounts = () => {
       accountType: '',
       status: '',
       openingBalance: 0,
+      currentBalance: openingBalance,
     });
   };
 
@@ -46,6 +47,7 @@ const Accounts = () => {
         accountType: accountData.accountType,
         status: accountData.status,
         openingBalance: accountData.openingBalance,
+        currentBalance: accountData.openingBalance,
         // Add other fields as necessary based on your form structure
       });
   
