@@ -1044,22 +1044,41 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   return res.status(200).json({ filePath });
 });
 
-app.get('/transactionsByDate', async (req, res) => {
+app.get('/transactionsrep', async (req, res) => {
+  const { accountNumber, startDate, endDate } = req.query;
+
   try {
-    const { startDate, endDate } = req.query;
-
-    if (!startDate || !endDate) {
-      return res.status(400).json({ message: 'Start date and end date are required' });
-    }
-
-    const filteredTransactions = await TransactionsModel.find({
+    const transactions = await TransactionsModel.find({
+      accountNumber: accountNumber,
       date: { $gte: new Date(startDate), $lte: new Date(endDate) }
+    }).sort({ date: 'asc' });
+
+    let balance = 0;
+    const formattedTransactions = transactions.map(transaction => {
+      let credit = 0;
+      let debit = 0;
+
+      if (transaction.debitOrCredit === 'Credit') {
+        credit = transaction.amount;
+        balance += transaction.amount;
+      } else if (transaction.debitOrCredit === 'Debit') {
+        debit = transaction.amount;
+        balance -= transaction.amount;
+      }
+
+      return {
+        Date: transaction.date,
+        Description: transaction.description,
+        Credit: credit,
+        Debit: debit,
+        Balance: balance
+      };
     });
 
-    res.status(200).json({ message: 'Transactions retrieved successfully', data: filteredTransactions });
+    res.status(200).json({ transactions: formattedTransactions });
   } catch (error) {
-    console.error('Error filtering transactions by date:', error);
-    res.status(500).json({ message: 'Error filtering transactions by date' });
+    console.error('Error fetching transactions:', error);
+    res.status(500).json({ error: 'Error fetching transactions' });
   }
 });
 

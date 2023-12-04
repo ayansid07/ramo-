@@ -11,17 +11,17 @@ const AccountStatement = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/transactionsByDate`, {
+      const response = await axios.get(`http://localhost:3001/transactionsrep`, {
         params: {
+          accountNumber,
           startDate,
-          endDate,
-          accountNumber
+          endDate
         }
       });
-      
+  
       if (response.status === 200) {
-        // Ensure that response.data.data contains the array of transactions
-        setTransactions(response.data.data); // Assuming your response data is an array of transactions
+        const transactionsData = response.data?.transactions || []; // Access transactions data, handle undefined case
+        setTransactions(transactionsData);
       } else {
         console.error('Failed to fetch data');
       }
@@ -29,7 +29,7 @@ const AccountStatement = () => {
       console.error('Error fetching data:', error);
     }
   };
-
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     fetchData();
@@ -92,22 +92,22 @@ const AccountStatement = () => {
             </tr>
           </thead>
           <tbody>
-             {Array.isArray(transactions) && transactions.length > 0 ? (
-              transactions.map((transaction, index) => (
-                <tr key={index}>
-                  <td>{transaction.date}</td>
-                  <td>{transaction.description}</td>
-                  <td>{transaction.debit}</td>
-                  <td>{transaction.credit}</td>
-                  <td>{transaction.balance}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5">No transactions found</td>
+          {transactions.length > 0 ? (
+            transactions.map((transaction, index) => (
+              <tr key={index}>
+                <td>{transaction.Date}</td>
+                <td>{transaction.Description}</td>
+                <td>{transaction.Debit}</td>
+                <td>{transaction.Credit}</td>
+                <td>{transaction.Balance}</td>
               </tr>
-            )}
-          </tbody>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5">{transactions.length === 0 ? 'No transactions found' : 'Loading...'}</td>
+            </tr>
+          )}
+            </tbody>
         </Table>
       </div>
     </div>
