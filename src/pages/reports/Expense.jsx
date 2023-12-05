@@ -9,6 +9,7 @@ export default function Expense() {
   const [endDate, setEndDate] = useState('');
   const [expenseType, setExpenseType] = useState('');
   const [categories, setCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   
 // Update handleInputChange to set the selected option correctly
 const handleInputChange = (e) => {
@@ -52,6 +53,11 @@ useEffect(() => {
   
   fetchData();
 }, [startDate, endDate, expenseType]);
+
+  // Function to filter expenses based on the reference field
+  const filteredExpenses = expenses.filter((expense) => {
+    return expense.reference.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div>
@@ -127,9 +133,14 @@ useEffect(() => {
           {/* Search Bar and Export PDF Button */}
           <Row className="mt-4">
             <Col md={6}>
-              <Form>
+            <Form>
                 <Form.Group controlId="expenseSearch">
-                  <Form.Control type="text" placeholder="Search..." />
+                  <Form.Control
+                    type="text"
+                    placeholder="Search Reference..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </Form.Group>
               </Form>
             </Col>
@@ -151,7 +162,7 @@ useEffect(() => {
               </tr>
             </thead>
             <tbody>
-              {expenses.map((expense, index) => (
+              {filteredExpenses.map((expense, index) => (
                 <tr key={index}>
                   <td>{expense.date}</td>
                   <td>{expense.reference}</td>

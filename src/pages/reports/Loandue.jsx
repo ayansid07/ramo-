@@ -50,6 +50,8 @@ const MyDocument = ({ data }) => (
 export default function Loandue() {
   const componentRef = useRef();
   const [data, setData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(''); // State for search term
+  const [filteredData, setFilteredData] = useState([]); // State to hold filtered data
 
   useEffect(() => {
     fetchData();
@@ -64,6 +66,19 @@ export default function Loandue() {
       // Handle error (display an error message, etc.)
     }
   };
+
+  // Function to handle search input change
+  const handleSearchChange = (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const filtered = data.filter((item) =>
+      item.loanId.toLowerCase().includes(searchTerm)
+    );
+    setFilteredData(filtered);
+  };
+
+  useEffect(() => {
+    setFilteredData(data); // Set filteredData initially with all data
+  }, [data]);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -83,56 +98,59 @@ export default function Loandue() {
       <div style={{ padding: '20px' }}>
 
     
-    <Container>
+      <Container>
+          <h2 className="mt-4">Loan Due Report</h2>
+          <Row className="mt-4">
+            <Col>
+              <Form>
+                <Row className="mb-2">
+                  <Col md={6}>
+                    <Form.Group controlId="searchBar">
+                      {/* Bind input value to searchTerm state and add onChange event */}
+                      <Form.Control
+                        type="text"
+                        placeholder="Search by Loan ID..."
+                        onChange={handleSearchChange}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6} className="d-flex justify-content-between">
+                    <Button variant="primary" type="submit" onClick={handlePrint}>
+                      Print
+                    </Button>
+                    <Button variant="danger" onClick={handleExportToPDF}>
+                      Export to PDF
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+            </Col>
+          </Row>
+          {/* Display filteredData instead of the original data */}
+          <div className="mt-4" ref={componentRef}>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Loan ID</th>
+                  <th>Member No.</th>
+                  <th>Member</th>
+                  <th>Total Due</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.loanId}</td>
+                    <td>{item.memberNo}</td>
+                    <td>{item.borrower}</td>
+                    <td>{item.totalDue}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </Container>
 
-      <h2 className="mt-4">Loan Due Report</h2>
-
-      <Row className="mt-4">
-        <Col>
-          <Form>
-            <Row className="mb-2">
-              <Col md={6}>
-                <Form.Group controlId="searchBar">
-                  <Form.Control type="text" placeholder="Search..." />
-                </Form.Group>
-              </Col>
-
-              <Col md={6} className="d-flex justify-content-between">
-                <Button variant="primary" type="submit" onClick={handlePrint}>
-                  Print
-                </Button>
-                <Button variant="danger" onClick={handleExportToPDF}>
-                  Export to PDF
-                </Button>
-              </Col>
-            </Row>
-          </Form>
-        </Col>
-      </Row>
-
-      <div className="mt-4" ref={componentRef}>
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Loan ID</th>
-              <th>Member No.</th>
-              <th>Member</th>
-              <th>Total Due</th>
-            </tr>
-          </thead>
-          <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
-              <td>{item.loanId}</td>
-              <td>{item.memberNo}</td>
-              <td>{item.borrower}</td>
-              <td>{item.totalDue}</td>
-            </tr>
-          ))}
-          </tbody>
-        </Table>
-      </div>
-    </Container>
     </div>
     </div>
   );

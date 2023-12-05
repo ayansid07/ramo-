@@ -96,7 +96,6 @@ const Navbar = () => {
           >
             <img
               className="rounded-full w-8 h-8"
-              src={avatar}
               alt="user-profile"
             />
             <p>

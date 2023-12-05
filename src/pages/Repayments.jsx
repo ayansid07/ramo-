@@ -54,6 +54,16 @@ const Repayments = () => {
       formData();
       fetchData();
       handleCloseModal();
+      setFormData({
+        loanId: '',
+        paymentDate: new Date(),
+        dueDate: new Date(),
+        dueAmount: 0,
+        principalAmount: 0,
+        interest: 0,
+        latePenalties: 0,
+        totalAmount: 0,
+      });  
     } catch (error) {
       // console.error('Some Error in submitting the form data to backend:', error);
       handleCloseModal();
@@ -85,15 +95,12 @@ const Repayments = () => {
   
   useEffect(() => {
     const filteredRepayments = repaymentsData.filter((repayment) =>
-      Object.values(repayment).some(
-        (value) =>
-          typeof value === 'number' && value.toString().includes(searchTerm)
-      )
+      repayment.loanId.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
+  
     setFilteredRepayments(filteredRepayments);
   }, [searchTerm, repaymentsData]);
-
+    
   return (
     <div className='body-div'>
       <div className="d-flex mb-2">

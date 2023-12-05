@@ -66,6 +66,7 @@ const User = () => {
       formDataForApi.append('password', formData.password);
       formDataForApi.append('userType', formData.userType);
       formDataForApi.append('status', formData.status);
+      formDataForApi.append('image',formData.image);
   
       const response = await axios.put(`http://localhost:3001/updateintuser/${editUserId}`, formDataForApi, {
         headers: {
@@ -94,7 +95,6 @@ const User = () => {
       // Handle error - display an error message or perform necessary actions
     }
   };
-  
       
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -135,7 +135,15 @@ const User = () => {
       formDataForApi.forEach((value, key) => {
       formDataForApi.delete(key);
       });
-
+      
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        userType: '',
+        status: '',
+        image: null,
+      });
       handleCloseModal();
       fetchData();
     } catch (error) {
@@ -144,16 +152,16 @@ const User = () => {
     }
   };
 
-    // Function to fetch user data from the backend
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/api/users'); // Replace with your API endpoint
-        setUsersData(response.data); // Update usersData state with the fetched data
-      } catch (error) {
-        // console.error('Error fetching users:', error);
-        // Handle error or display an error message to the user
-      }
-    };
+  // Function to fetch user data from the backend
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/users'); // Replace with your API endpoint
+      setUsersData(response.data); // Update usersData state with the fetched data
+    } catch (error) {
+      // console.error('Error fetching users:', error);
+      // Handle error or display an error message to the user
+    }
+  };
 
   useEffect(() => {
     // Call the function to fetch user data when the component mounts
@@ -360,18 +368,18 @@ const User = () => {
         <tbody>
           {usersData.map((user, index) => (
             <tr key={index}>
-              <td>
-                {user.image ? (
-                  <img
-                    src={`http://localhost:3001/backend/${user.image}`} // Replace 'http://localhost:3001/' with your actual server URL
-                    alt="Profile"
-                    width="40"
-                    height="40"
-                  />
-                ) : (
-                  'No Image'
-                )}
-              </td>
+            <td>
+              {user.image ? (
+                <img
+                  src={`file:///${__dirname}/backend/${user.image}`} // Use forward slashes in the path
+                  alt="Profile"
+                  width="40"
+                  height="40"
+                />
+              ) : (
+                'No Image'
+              )}
+            </td>
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.userType}</td>

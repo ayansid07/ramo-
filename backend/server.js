@@ -1104,21 +1104,35 @@ app.get('/usersdetails/:id', async (req, res) => {
   }
 });
 
-app.put('/updateintuser/:id', async (req, res) => {
+// Route to update an existing user in the database
+app.put('/updateintuser/:id', upload.single('image'), async (req, res) => {
   try {
-    const userId = req.params.id;
-    const updatedUserData = req.body; // Assuming this matches your user model
+    const userId = req.params.id; // Extract the user ID from the request parameters
+    const { name, email, password, userType, status } = req.body;
 
-    // Assuming intuserModel represents your Mongoose model
+    let updatedUserData = {
+      name,
+      email,
+      password,
+      userType,
+      status,
+    };
+
+    // Check if an image was uploaded and update the image path if needed
+    if (req.file) {
+      updatedUserData.image = req.file.path;
+    }
+
+    // Find the user by ID and update the user data
     const updatedUser = await intuserModel.findByIdAndUpdate(userId, updatedUserData, { new: true });
 
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.status(200).json(updatedUser); // Send the updated user data back to the client
+    res.status(200).json({ message: 'User updated successfully!', user: updatedUser });
   } catch (error) {
-    res.status(500).json({ error: error.message }); // Handle server errors
+    res.status(500).json({ message: 'Failed to update user', error: error.message });
   }
 });
 
@@ -1399,6 +1413,90 @@ app.delete('/categories/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+app.get('/countMembers', limiter, async (req, res) => {
+  try {
+    const count = await memberModel.countDocuments();
+
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error('Error counting members:', error);
+    res.status(500).json({ message: 'Error counting members' });
+  }
+});
+
+// Endpoint to get the number of deposit requests pending
+app.get('/depositRequestsPending', async (req, res) => {
+  try {
+    const depositRequestsPending = await TransactionsModel.countDocuments({ debitOrCredit: 'Credit', status: 'Pending' });
+
+    res.status(200).json({count: depositRequestsPending });
+  } catch (error) {
+    console.error('Error retrieving deposit requests pending:', error);
+    res.status(500).json({ message: 'Error retrieving deposit requests pending' });
+  }
+});
+
+// Endpoint to get the number of withdraw requests pending
+app.get('/withdrawRequestsPending', async (req, res) => {
+  try {
+    const withdrawRequestsPending = await TransactionsModel.countDocuments({ debitOrCredit: 'Debit', status: 'Pending' });
+
+    res.status(200).json({ count: withdrawRequestsPending });
+  } catch (error) {
+    console.error('Error retrieving withdraw requests pending:', error);
+    res.status(500).json({ message: 'Error retrieving withdraw requests pending' });
+  }
+});
+
+// GET endpoint to fetch pending loans
+app.get('/pendingLoans', async (req, res) => {
+  try {
+    const pendingLoans = await loansModel.find({ status: 'Pending' });
+
+    res.status(200).json({ data: pendingLoans });
+  } catch (error) {
+    console.error('Error retrieving pending loans:', error);
+    res.status(500).json({ message: 'Error retrieving pending loans' });
+  }
+});
+
+app.get('/api/cleanOrphanedImages', async (req, res) => {
+  try {
+    // Retrieve all users with their associated image file names from the database
+    const users = await intuserModel.find({}, 'image');
+
+    // Get the list of image file names from the database
+    const imageFileNames = users.map(user => user.image).filter(Boolean);
+
+    // Get the list of image files in the 'uploads' folder
+    const uploadFolder = path.join(__dirname, 'uploads'); // Replace 'uploads' with your actual folder name
+    const uploadedFiles = fs.readdirSync(uploadFolder);
+
+    // Find image files in the 'uploads' folder that don't have a corresponding user
+    const orphanedImages = uploadedFiles.filter(file => !imageFileNames.includes(file));
+
+    // Process and delete orphaned image files
+    orphanedImages.forEach(async (fileName) => {
+      const filePath = path.join(uploadFolder, fileName);
+
+      // Delete the file from the folder
+      fs.unlink(filePath, async (err) => {
+        if (err) {
+          console.error(`Error deleting file: ${fileName}`, err);
+          // Handle deletion error if required
+        } else {
+          console.log(`File ${fileName} deleted.`);
+        }
+      });
+    });
+
+    res.status(200).json({ message: 'Orphaned images cleanup completed.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
