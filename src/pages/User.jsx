@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form, Table, Badge } from 'react-bootstrap';
+import { FaEdit,FaTrash } from 'react-icons/fa';
 
 const User = () => {
   const [showModal, setShowModal] = useState(false);
@@ -153,7 +154,7 @@ const User = () => {
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover className="mt-4">
+      <Table striped bordered hover className="mt-4 rounded-lg overflow-hidden">
         <thead>
           <tr>
             <th>Image</th>
@@ -189,10 +190,10 @@ const User = () => {
               </td>
               <td>
                 <Button variant="warning" onClick={() => handleEdit(index)}>
-                  Edit
+                  <FaEdit/>
                 </Button>{' '}
                 <Button variant="danger" onClick={() => handleDelete(index)}>
-                  Delete
+                  <FaTrash/>
                 </Button>
               </td>
             </tr>

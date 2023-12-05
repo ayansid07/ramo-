@@ -6,17 +6,17 @@ import './Reports.css';
 
 const Reports = () => {
   return (
-    <div>
-    <Navbar style={{ backgroundColor: '#e0ffff', borderRadius: '10px' }} expand="lg" className="mx-auto ">
+    <div className='m-4 flex justify-center  '>
+    <Navbar style={{ backgroundColor: 'white', borderRadius: '10px' }} expand="lg" className="mx-auto  ">
       <Navbar.Brand style={{ padding: '10px', borderRight: '1px solid #ccc' }}>
         Reports
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="ml-5 flex items-center">
-          <Nav.Link as={NavLink} to="/Accountstatement" activeClassName="active" className="nav-link">
+        <Nav className="ml-5 flex items-center antialiased hover:subpixel-antialiased  ">
+          <Nav.Link as={NavLink} to="/Accountstatement" activeClassName="active" className="nav-link  ">
             Account Statement
-          </Nav.Link>
+          </Nav.Link> 
           <Nav.Link as={NavLink} to="/Accountbalance" activeClassName="active" className="nav-link">
             Account Balance
           </Nav.Link>

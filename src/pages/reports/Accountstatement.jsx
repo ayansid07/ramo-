@@ -48,8 +48,9 @@ const AccountStatement = () => {
       </Row>
 
       <hr />
+      <br/>
 
-      <Table striped bordered hover>
+      <Table striped bordered hover className='rounded-lg overflow-hidden'>
         <thead>
           <tr>
             <th>Date</th>

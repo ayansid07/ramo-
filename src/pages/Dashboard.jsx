@@ -4,6 +4,7 @@ import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosMore } from "react-icons/io";
 import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
 
+// import Button from 'react-bootstrap/Button';
 import { Stacked, Pie, Button, LineChart, SparkLine } from "../components";
 import {
   earningData,
@@ -19,8 +20,6 @@ import product9 from "../data/product9.jpg";
 import { useNavigate } from "react-router-dom";
 
 const DropDown = ({ currentMode }) => (
-
-
   <div className="w-28 border-1 border-color px-2 py-1 rounded-md">
     <DropDownListComponent
       id="time"
@@ -39,11 +38,6 @@ const Ecommerce = () => {
 
   const navigate = useNavigate();
 
-  const handleButtonClick = () => {
-    // Navigate to the '/loans' route
-    navigate('/Loans');
-  };
-
   return (
     <div className="mt-18">
       <div className="flex flex-wrap lg:flex-nowrap justify-center">
@@ -55,12 +49,10 @@ const Ecommerce = () => {
             </div>
           </div>
           <div className="mt-6">
-            <Button
-              color="white"
-              bgColor={currentColor}
-              text="View"
-              borderRadius="10px"
-            />
+            <button onClick={() => navigate("/members")} className="bg-cyan-500
+             hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-outline-blue active:bg-gray-500"
+            >View</button>
+           
           </div>
         </div>
         {/* 1st card end */}
@@ -74,12 +66,9 @@ const Ecommerce = () => {
             </div>
           </div>
           <div className="mt-6">
-            <Button
-              color="white"
-              bgColor={currentColor}
-              text="View"
-              borderRadius="10px"
-            />
+            <button onClick={() => navigate("/deposit")} className="bg-cyan-500
+             hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-outline-blue active:bg-gray-500"
+            >View</button>
           </div>
         </div>
         {/* 2nd card end */}
@@ -93,45 +82,40 @@ const Ecommerce = () => {
             </div>
           </div>
           <div className="mt-6">
-            <Button
-              color="white"
-              bgColor={currentColor}
-              text="View"
-              borderRadius="10px"
-            />
+            <button onClick={() => navigate("/withdraw")} className="bg-cyan-500
+             hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-outline-blue active:bg-gray-500"
+            >View</button>
+            
           </div>
         </div>
         {/* 3rd card end */}
 
-
         <div class="relative bg-white dark:text-gray-200 dark:bg-secondary-dark-bg h-44 rounded-xl w-full lg:w-44 p-8 pt-9 m-3 bg-hero-pattern bg-no-repeat bg-cover bg-center shadow-lg transform transition duration-300 hover:translate-y-[-8px] ">
           <div className="flex justify-between items-center">
-            <div >
+            <div>
               <p className="font-bold text-gray-400">Pending Loans</p>
               <p className="text-2xl">4</p>
             </div>
           </div>
           <div className="mt-6">
-            <Button
-              onClick={handleButtonClick}        
-              color="white"
-              bgColor={currentColor}
-              text="View"
-              borderRadius="10px"  
-            />
+            <button
+              onClick={() => navigate("/loans")}
+              className="bg-cyan-500
+             hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-outline-blue active:bg-gray-500"
+            >
+              View
+            </button>
           </div>
         </div>
       </div>
       {/* 4th card end */}
-
-
 
       <div className="flex flex-wrap justify-center mt-10 mb-10">
         <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg m-3 p-4 rounded-2xl md:w-760 w-90 shadow-lg mt-8">
           <div className="flex justify-between">
             <p className="font-semibold text-xl">Expense Overview </p>
           </div>
-          
+
           <div className="mt-10 flex gap-10 flex-wrap justify-center">
             <div className=" border-r-1 border-color m-4 pr-10">
               <div className="w-40">
@@ -142,7 +126,6 @@ const Ecommerce = () => {
                   height="260px"
                 />
               </div>
-
             </div>
             <div>
               <Stacked currentMode={currentMode} width="320px" height="360px" />
@@ -152,7 +135,7 @@ const Ecommerce = () => {
       </div>
 
       <div className="mx-6 ">
-        <table  className='table text-center bg-info text-white rounded-lg overflow-hidden '>
+        <table className="table text-center bg-info text-white rounded-lg overflow-hidden ">
           <thead>
             <tr class="table-secondary">
               <th>Date</th>
@@ -178,13 +161,9 @@ const Ecommerce = () => {
           })}
         </tbody> */}
         </table>
-
       </div>
     </div>
   );
 };
 
 export default Ecommerce;
-
-
-

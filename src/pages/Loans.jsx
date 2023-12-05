@@ -1,24 +1,25 @@
 // Loans.jsx
 
-import React, { useState } from 'react';
-import { Modal, Button, Form, Table, FormControl } from 'react-bootstrap';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import React, { useState } from "react";
+import { Modal, Button, Form, Table, FormControl } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const Loans = () => {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    loanId: '',
-    loanProduct: '',
-    borrower: '',
-    memberNo: '',
+    loanId: "",
+    loanProduct: "",
+    borrower: "",
+    memberNo: "",
     releaseDate: new Date(), // Default date
-    appliedAmount: '',
-    status: 'Pending',
+    appliedAmount: "",
+    status: "Pending",
   });
   const [loansData, setLoansData] = useState([]);
   const [selectedLoanIndex, setSelectedLoanIndex] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => {
@@ -80,27 +81,31 @@ const Loans = () => {
   const filteredLoans = loansData.filter((loan) =>
     Object.values(loan).some(
       (value) =>
-        typeof value === 'string' &&
+        typeof value === "string" &&
         value.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-
   return (
-    <div className='body-div'>
+    <div className="body-div">
       <div className="d-flex mb-2">
-        <Button className="mr-2" onClick={() => { setFormData({}); handleOpenModal(); }}>
+        <Button
+          className="mr-2"
+          onClick={() => {
+            setFormData({});
+            handleOpenModal();
+          }}
+        >
           Add Loan
         </Button>
         <FormControl
-          className='custom-search-bar'
+          className="custom-search-bar"
           type="text"
           placeholder="Search..."
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-    
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>Add Loan</Modal.Title>
@@ -149,11 +154,11 @@ const Loans = () => {
             </Form.Group>
             <Form.Group controlId="formReleaseDate">
               <Form.Label>Release Date</Form.Label>
-              <br />
-              <DatePicker
-                selected={formData.releaseDate}
-                onChange={handleDateChange}
-                dateFormat="MM/dd/yyyy"
+              <Form.Control
+                type="date"
+                name="releaseDate"
+                // value={formData.releaseDate.toISOString().split("T")[0]} // Format the date as YYYY-MM-DD
+                onChange={handleInputChange}
               />
             </Form.Group>
             <Form.Group controlId="formAppliedAmount">
@@ -174,7 +179,7 @@ const Loans = () => {
                   type="radio"
                   label="Approved"
                   value="Approved"
-                  checked={formData.status === 'Approved'}
+                  checked={formData.status === "Approved"}
                   onChange={handleStatusChange}
                 />
                 <Form.Check
@@ -182,7 +187,7 @@ const Loans = () => {
                   type="radio"
                   label="Pending"
                   value="Pending"
-                  checked={formData.status === 'Pending'}
+                  checked={formData.status === "Pending"}
                   onChange={handleStatusChange}
                 />
                 <Form.Check
@@ -190,20 +195,25 @@ const Loans = () => {
                   type="radio"
                   label="Cancelled"
                   value="Cancelled"
-                  checked={formData.status === 'Cancelled'}
+                  checked={formData.status === "Cancelled"}
                   onChange={handleStatusChange}
                 />
               </div>
             </Form.Group>
             <Button variant="primary" type="submit">
-              {selectedLoanIndex !== null ? 'Edit' : 'Add'}
+              {selectedLoanIndex !== null ? "Edit" : "Add"}
             </Button>
-           
           </Form>
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover className="mt-4">
+      <Table
+        responsive
+        striped
+        bordered
+        hover
+        className="mt-4 rounded-lg overflow-hidden"
+      >
         <thead>
           <tr>
             <th>Loan ID</th>
@@ -216,24 +226,24 @@ const Loans = () => {
             <th>Action</th>
           </tr>
         </thead>
-         
-          <tbody>
+
+        <tbody>
           {filteredLoans.map((loan, index) => (
             <tr key={index}>
-               <td>{loan.loanId}</td>
-          <td>{loan.loanProduct}</td>
-          <td>{loan.borrower}</td>
-          <td>{loan.memberNo}</td>
-          <td>{new Date(loan.releaseDate).toLocaleDateString()}</td>
-          <td>{loan.appliedAmount}</td>
-          <td>{loan.status}</td>
-          
+              <td>{loan.loanId}</td>
+              <td>{loan.loanProduct}</td>
+              <td>{loan.borrower}</td>
+              <td>{loan.memberNo}</td>
+              <td>{new Date(loan.releaseDate).toLocaleDateString()}</td>
+              <td>{loan.appliedAmount}</td>
+              <td>{loan.status}</td>
+
               <td>
-                <Button variant="info" onClick={() => handleEdit(index)}>
-                  Edit
-                </Button>{' '}
+                <Button variant="warning" onClick={() => handleEdit(index)}>
+                  <FaEdit />
+                </Button>{" "}
                 <Button variant="danger" onClick={() => handleDelete(index)}>
-                  Delete
+                  <FaTrash />
                 </Button>
               </td>
             </tr>

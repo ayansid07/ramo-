@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form, Table, Alert, InputGroup, FormControl } from 'react-bootstrap';
+import { FaEdit, FaTrash } from "react-icons/fa";
+
 
 const Branches = () => {
   const [showModal, setShowModal] = useState(false);
@@ -169,7 +171,7 @@ const Branches = () => {
         {alertVariant === 'success' ? 'Success! Operation completed.' : 'Error! Something went wrong.'}
       </Alert>
 
-      <Table striped bordered hover className="mt-4">
+      <Table responsive striped bordered hover className="mt-4 rounded-lg overflow-hidden">
         <thead>
           <tr>
             <th>Name</th>
@@ -188,10 +190,10 @@ const Branches = () => {
               <td>{member.address}</td>
               <td>
                 <Button variant="warning" onClick={() => handleEdit(index)}>
-                  Edit
+                  <FaEdit/>
                 </Button>{' '}
                 <Button variant="danger" onClick={() => handleDelete(index)}>
-                  Delete
+                  <FaTrash/>
                 </Button>
               </td>
             </tr>

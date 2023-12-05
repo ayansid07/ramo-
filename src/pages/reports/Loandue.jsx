@@ -115,7 +115,7 @@ export default function Loandue() {
           </Row>
 
           <div className="mt-4" ref={componentRef}>
-            <Table striped bordered hover>
+            <Table striped bordered hover className='rounded-lg overflow-hidden'>
               <thead>
                 <tr>
                   <th>Loan ID</th>
