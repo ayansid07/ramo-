@@ -1261,6 +1261,42 @@ app.get('/loandue', async (req, res) => {
   }
 });
 
+app.get('/transactionreport', async (req, res) => {
+  try {
+    const { startDate, endDate, transactionType, transactionStatus, accountNumber } = req.query;
+    let query = {};
+
+    // Adding filters based on provided query parameters
+    if (startDate && endDate) {
+      query.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    if (transactionType) {
+      query.debitOrCredit = transactionType;
+    }
+
+    if (transactionStatus) {
+      query.status = transactionStatus;
+    }
+
+    if (accountNumber) {
+      query.accountNumber = accountNumber;
+    }
+
+    // Fetching data based on query filters
+    const transactions = await TransactionsModel.find(query)
+      .select('date member accountNumber transactionAmount debitOrCredit status')
+      .exec();
+
+    res.status(200).json(transactions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
