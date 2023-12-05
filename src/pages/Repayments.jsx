@@ -13,6 +13,7 @@ const Repayments = () => {
     loanId: '',
     paymentDate: new Date(),
     dueDate: new Date(),
+    dueAmount: 0,
     principalAmount: 0,
     interest: 0,
     latePenalties: 0,
@@ -29,6 +30,7 @@ const Repayments = () => {
       loanId: '',
       paymentDate: new Date(),
       dueDate: new Date(),
+      dueAmount: 0,
       principalAmount: 0,
       interest: 0,
       latePenalties: 0,
@@ -50,10 +52,11 @@ const Repayments = () => {
       const response = await axios.post('http://localhost:3001/repayments', formData);
       // console.log('Data Successfully entered in Backend Server', response.data.data);
       formData();
+      fetchData();
       handleCloseModal();
     } catch (error) {
       // console.error('Some Error in submitting the form data to backend:', error);
-      // handleCloseModal();
+      handleCloseModal();
     }
   };
   
@@ -156,6 +159,16 @@ const Repayments = () => {
                 dateFormat="MM/dd/yyyy"
               />
             </Form.Group>
+            <Form.Group controlId="formDueAmount">
+              <Form.Label>Due Amount</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter Due amount"
+                name="dueAmount"
+                value={formData.dueAmount}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
             <Form.Group controlId="formPrincipalAmount">
               <Form.Label>Principal Amount</Form.Label>
               <Form.Control
@@ -209,6 +222,7 @@ const Repayments = () => {
             <th>Loan ID</th>
             <th>Payment Date</th>
             <th>Due Date</th>
+            <th>Due Amount</th>
             <th>Principal Amount</th>
             <th>Interest</th>
             <th>Late Penalties</th>
@@ -221,6 +235,7 @@ const Repayments = () => {
               <td>{repayment.loanId}</td>
               <td>{new Date(repayment.paymentDate).toLocaleDateString()}</td>
               <td>{new Date(repayment.dueDate).toLocaleDateString()}</td>
+              <td>{repayment.dueAmount}</td>
               <td>{repayment.principalAmount}</td>
               <td>{repayment.interest}</td>
               <td>{repayment.latePenalties}</td>

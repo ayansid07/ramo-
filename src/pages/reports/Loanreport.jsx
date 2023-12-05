@@ -22,6 +22,7 @@ export default function Loanreport() {
     try {
       const response = await axios.post('http://localhost:3001/loanreport', formData);
       setLoanData(response.data);
+      console.log(response);
     } catch (error) {
       console.error('Error fetching loan data:', error);
       // Handle error (display an error message, etc.)
@@ -124,7 +125,7 @@ return (
         <td>{loan.loanProduct}</td>
         <td>{loan.borrower}</td>
         <td>{loan.appliedAmount}</td>
-        <td>{loan.repaymentPlan ? loan.repaymentPlan.dueAmount : 'N/A'}</td>
+        <td>{loan.dueAmount !== null ? loan.dueAmount : 'N/A'}</td>
         <td>{loan.status}</td>
         <td>View Details</td>
       </tr>

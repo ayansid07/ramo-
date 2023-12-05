@@ -72,7 +72,7 @@ const memberSchema = new mongoose.Schema({
 },{collection:'members'})
 
 const loanSchema = new mongoose.Schema({
-  loanId: { type: String, required: true, unique: true },
+  loanId: { type: String, required: true, unique: true},
   loanProduct: { type: String, required: true },
   borrower: { type: String, required: true },
   memberNo: { type: Number, required: true },
@@ -83,9 +83,10 @@ const loanSchema = new mongoose.Schema({
 }, { collection: 'loans' });
 
 const repaymentSchema = new mongoose.Schema({
-  loanId: { type: String, ref: 'loansModel', required: true, unique: true },
+  loanId: { type: String, ref: 'loansModel', required: true },
   paymentDate: { type: Date, required: true },
   dueDate: { type: Date, required: true },
+  dueAmount: { type: Number, required:true},
   principalAmount: { type: Number, required: true },
   interest: { type: Number, required: true },
   latePenalties: { type: Number, required: true },
@@ -661,6 +662,7 @@ app.post('/repayments', async (req, res) => {
       loanId,
       paymentDate,
       dueDate,
+      dueAmount,
       principalAmount,
       interest,
       latePenalties,
@@ -671,6 +673,7 @@ app.post('/repayments', async (req, res) => {
       loanId,
       paymentDate,
       dueDate,
+      dueAmount,
       principalAmount,
       interest,
       latePenalties,
@@ -716,7 +719,7 @@ app.put('/repayments/:id', async (req, res) => {
   try {
     const repaymentId = req.params.id;
     const {
-      loanId, paymentDate, dueDate, principalAmount, interest, latePenalties, totalAmount
+      loanId, paymentDate, dueDate,dueAmount, principalAmount, interest, latePenalties, totalAmount
     } = req.body;
 
     const updatedRepayment = await repaymentModel.findByIdAndUpdate(repaymentId, {
@@ -1222,7 +1225,7 @@ app.post('/loanreport', async (req, res) => {
         releaseDate: loan.releaseDate,
         appliedAmount: loan.appliedAmount,
         status: loan.status,
-        dueAmount: correspondingRepayment ? correspondingRepayment.totalAmount : null,
+        dueAmount: correspondingRepayment ? correspondingRepayment.dueAmount : null,
       };
     });
 
@@ -1231,6 +1234,33 @@ app.post('/loanreport', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+app.get('/loandue', async (req, res) => {
+  try {
+    // Fetching loans data
+    const loans = await loansModel.find({}, 'loanId memberNo borrower');
+
+    // Fetching repayments data
+    const repayments = await repaymentModel.find({}, 'loanId dueAmount');
+
+    // Processing the data to calculate total due for each loan
+    const processedData = loans.map((loan) => {
+      const loanRepayments = repayments.filter((repayment) => repayment.loanId === loan.loanId);
+      const totalDue = loanRepayments.reduce((total, repayment) => total + repayment.dueAmount, 0);
+      return {
+        loanId: loan.loanId,
+        memberNo: loan.memberNo,
+        borrower: loan.borrower,
+        totalDue: totalDue,
+      };
+    });
+
+    res.status(200).json(processedData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

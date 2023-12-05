@@ -1,7 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef,useEffect,useState } from 'react';
 import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import Reports from '../Reports';
 import { useReactToPrint } from 'react-to-print';
+import axios from 'axios';
 import { PDFViewer, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
@@ -48,10 +49,21 @@ const MyDocument = ({ data }) => (
 
 export default function Loandue() {
   const componentRef = useRef();
-  const data = [
-    { id: 1, loanId: '1', memberNo: '12345', member: 'John Doe', totalDue: '$2,000' },
-    // Add more data as needed
-  ];
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []); // Fetch data on component mount
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/loandue');
+      setData(response.data);
+    } catch (error) {
+      console.error('Error fetching loan report data:', error);
+      // Handle error (display an error message, etc.)
+    }
+  };
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -109,14 +121,14 @@ export default function Loandue() {
             </tr>
           </thead>
           <tbody>
-            {data.map((row) => (
-              <tr key={row.id}>
-                <td>{row.loanId}</td>
-                <td>{row.memberNo}</td>
-                <td>{row.member}</td>
-                <td>{row.totalDue}</td>
-              </tr>
-            ))}
+          {data.map((item) => (
+            <tr key={item.id}>
+              <td>{item.loanId}</td>
+              <td>{item.memberNo}</td>
+              <td>{item.borrower}</td>
+              <td>{item.totalDue}</td>
+            </tr>
+          ))}
           </tbody>
         </Table>
       </div>
