@@ -83,7 +83,6 @@ const Repayments = () => {
     fetchData();
   }, []);
   
-
   useEffect(() => {
     const filteredRepayments = repaymentsData.filter((repayment) =>
       Object.values(repayment).some(

@@ -15,25 +15,40 @@ const Expense = () => {
   });
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
-
-  // Simulating API call to fetch categories
-    // Replace 'your-categories-api-endpoint' with the actual API endpoint for categories
-    const fetchData = async () => {
-      try {
-        // const response = await fetch('your-categories-api-endpoint');
-        // const data = await response.json();
-        // setCategories(data); // Assuming data is an array of categories
-        
-        const response1 = await axios.get('http://localhost:3001/expenses'); // Replace with your expenses endpoint
-        setExpenses(response1.data); // Assuming the response data contains an array of expenses
-      } catch (error) {
-        console.error('Error fetching expenses:', error);
-      }
-    };
+  const [newCategory, setNewCategory] = useState('');
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const categoriesResponse = await axios.get('http://localhost:3001/categories');
+      setCategories(categoriesResponse.data); // Assuming data is an array of categories
+
+      const expensesResponse = await axios.get('http://localhost:3001/expenses');
+      setExpenses(expensesResponse.data); // Assuming the response data contains an array of expenses
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    try {
+      const response = await axios.post('http://localhost:3001/categories', {
+        name: newCategory,
+      });
+
+      if (response.status === 201) {
+        setNewCategory('');
+        fetchData();
+      } else {
+        console.error('Failed to add category');
+      }
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +68,6 @@ const Expense = () => {
   const handleModalShow = () => setShowModal(true);
   const handleModalClose = () => {
     setShowModal(false);
-    // Reset form data when the modal is closed
     setFormData({
       date: new Date(),
       category: '',
@@ -66,13 +80,7 @@ const Expense = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Send form data to your API endpoint to create a transaction
-      const response = await axios.post('http://localhost:3001/expenses', formData);
-
-      const data = await response.json();
-      // console.log('Expense created:', data); // Log the response from the server
-      
-      // Reset form fields after successful submission if needed
+      await axios.post('http://localhost:3001/expenses', formData);
       setFormData({
         date: new Date(),
         category: '',
@@ -82,9 +90,8 @@ const Expense = () => {
       });
       fetchData();
     } catch (error) {
-      // console.error('Error creating Expense:', error);
+      console.error('Error creating Expense:', error);
     }
-    // console.log(formData);
     handleModalClose();
   };
 
@@ -119,15 +126,29 @@ const Expense = () => {
                 onChange={handleInputChange}
                 required
               >
-                <option value="">Select Category</option>
-                {/* {categories.map((category) => (
+                <option value="">Select or Add Category</option>
+                {categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
-                ))} */}
-                <option value="A">Category A</option>
-                <option value="B">Category B</option>
+                ))}
+                <option value="newCategory">Add New Category</option>
               </Form.Control>
+              {formData.category === 'newCategory' && (
+                <div>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter New Category"
+                    name="newCategory"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    className="mt-2"
+                  />
+                  <Button variant="primary" onClick={handleAddCategory} className="mt-2">
+                    Add Category
+                  </Button>
+                </div>
+              )}
             </Form.Group>
             <Form.Group controlId="amount">
               <Form.Label>Amount</Form.Label>

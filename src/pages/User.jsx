@@ -226,6 +226,8 @@ const User = () => {
                 <option value="">Select User Type</option>
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
+                <option value="franchise">Franchise</option>
+                <option value="agent">Agent</option>
               </Form.Control>
             </Form.Group>
             <Form.Group controlId="formStatus">

@@ -102,8 +102,8 @@ const Accounts = () => {
     try {
       await axios.post('http://localhost:3001/createaccounts', formData);
       // alert('Data Entered Successfully');
-      fetchData(); // Fetch data after successful addition
       handleCloseEditModal();
+      fetchData(); // Fetch data after successful addition
     } catch (error) {
       // alert('Check Data Fields for no duplicates');
       // console.error('Error:', error);

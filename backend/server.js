@@ -130,6 +130,13 @@ const intuserSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive'], default: 'active' }
 }, { collection: 'intuserdata' });
 
+const categorySchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+},{collection:'category'});
+
 const userModel = mongoose.model('userdata', userSchema);
 const branchesModel = mongoose.model('branches',branchesSchema);
 const memberModel = mongoose.model('members',memberSchema);
@@ -139,6 +146,7 @@ const AccountModel = mongoose.model('accounts',accountSchema);
 const TransactionsModel = mongoose.model('transactions',transactionSchema);
 const ExpenseModel = mongoose.model('expenses',expenseSchema);
 const intuserModel = mongoose.model('intuserdata',intuserSchema);
+const categoryModel = mongoose.model('category',categorySchema);
 
 // Multer configuration for handling file uploads
 const storage = multer.diskStorage({
@@ -1188,7 +1196,7 @@ app.get('/accountstatement', async (req, res) => {
 // Endpoint to fetch data based on filters sent in the request body
 app.post('/loanreport', async (req, res) => {
   try {
-    const { startDate, endDate, loanStatus, memberNo } = req.body;
+    const { startDate, endDate, loanType, memberNo } = req.body;
     let query = {};
 
     // Adding filters based on provided request body
@@ -1199,8 +1207,8 @@ app.post('/loanreport', async (req, res) => {
       };
     }
 
-    if (loanStatus) {
-      query.status = loanStatus;
+    if (loanType) {
+      query.status = loanType;
     }
 
     if (memberNo) {
@@ -1297,6 +1305,100 @@ app.get('/transactionreport', async (req, res) => {
   }
 });
 
+app.get('/reportexpenses', async (req, res) => {
+  try {
+    const { startDate, endDate, expenseType, sortBy, sortOrder } = req.query;
+
+    // Construct the query based on provided parameters
+    let query = {};
+
+    if (startDate && endDate) {
+      query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    }
+    if (expenseType) {
+      query.category = expenseType; // Assuming 'category' holds the expense type
+    }
+
+    const sortOptions = {};
+
+    if (sortBy && sortOrder) {
+      sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    } else {
+      // Default sorting by date in descending order if no sort options provided
+      sortOptions.date = -1;
+    }
+
+    const expenses = await ExpenseModel.find(query).sort(sortOptions);
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving expenses', error: error.message });
+  }
+});
+
+// Create a new category
+app.post('/categories', async (req, res) => {
+  try {
+    const { name } = req.body;
+    const newCategory = new categoryModel({ name });
+    await newCategory.save();
+    res.status(201).json(newCategory);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all categories
+app.get('/categories', async (req, res) => {
+  try {
+    const categories = await categoryModel.find();
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get a single category by ID
+app.get('/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const category = await categoryModel.findById(id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.json(category);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update a category by ID
+app.put('/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const updatedCategory = await categoryModel.findByIdAndUpdate(id, { name }, { new: true });
+    if (!updatedCategory) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.json(updatedCategory);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete a category by ID
+app.delete('/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedCategory = await categoryModel.findByIdAndDelete(id);
+    if (!deletedCategory) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

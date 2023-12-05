@@ -20,6 +20,7 @@ const Loans = () => {
   const [memberNumbers,setmemberNumbers] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [accountIds, setAccountIds] = useState([]);
+  const [memberNames, setMemberNames] = useState([]);
 
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => {
@@ -185,6 +186,10 @@ const Loans = () => {
       const response = await axios.get('http://localhost:3001/accountids');
       setAccountIds(response.data.data);
       // console.log(response);
+
+      const memberresponse = await axios.get('http://localhost:3001/readmembersname');
+      const names = memberresponse.data.data.map((member) => member.name);
+      setMemberNames(names);  
     } catch (error) {
       // console.error('Error fetching data:', error);
       // Handle error or display an error message
@@ -268,15 +273,21 @@ const Loans = () => {
               />
             </Form.Group>
             <Form.Group controlId="formBorrower">
-              <Form.Label>Borrower</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter borrower name"
-                name="borrower"
-                value={formData.borrower}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+            <Form.Label>Borrower</Form.Label>
+            <Form.Control
+              as="select"
+              name="borrower"
+              value={formData.borrower}
+              onChange={handleInputChange}
+            >
+              <option value="">Select Borrower Name</option>
+              {memberNames.map((name, index) => (
+                <option key={index} value={name}>
+                  {name}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
             <Form.Group controlId="formMemberNo">
             <Form.Label>Member No</Form.Label>
             <Form.Control
@@ -403,15 +414,21 @@ const Loans = () => {
               />
             </Form.Group>
             <Form.Group controlId="formBorrower">
-              <Form.Label>Borrower</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter borrower name"
-                name="borrower"
-                value={formData.borrower}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+            <Form.Label>Borrower</Form.Label>
+            <Form.Control
+              as="select"
+              name="borrower"
+              value={formData.borrower}
+              onChange={handleInputChange}
+            >
+              <option value="">Select Borrower Name</option>
+              {memberNames.map((name, index) => (
+                <option key={index} value={name}>
+                  {name}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
             <Form.Group controlId="formMemberNo">
             <Form.Label>Member No</Form.Label>
             <Form.Control
