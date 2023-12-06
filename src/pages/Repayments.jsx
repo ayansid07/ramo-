@@ -51,7 +51,6 @@ const Repayments = () => {
     try {  
       const response = await axios.post('http://localhost:3001/repayments', formData);
       // console.log('Data Successfully entered in Backend Server', response.data.data);
-      formData();
       fetchData();
       handleCloseModal();
       setFormData({

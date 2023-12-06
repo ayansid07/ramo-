@@ -157,61 +157,6 @@ export default function Loandue() {
         </Container>
 
     </div>
-        <Container>
-          <h2 className="mt-4">Loan Due Report</h2>
-
-          <Row className="mt-4">
-            <Col>
-              <Form>
-                <Row className="mb-2">
-                  <Col md={6}>
-                    <Form.Group controlId="searchBar">
-                      <Form.Control
-                        type="text"
-                        placeholder="Search..."
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-
-                  <Col md={6} className="d-flex justify-content-between">
-                    <Button variant="primary" type="button" onClick={handleSearch}>
-                      Search
-                    </Button>
-                    <Button variant="danger" onClick={handleExportToPDF}>
-                      Export to PDF
-                    </Button>
-                  </Col>
-                </Row>
-              </Form>
-            </Col>
-          </Row>
-
-          <div className="mt-4" ref={componentRef}>
-            <Table striped bordered hover className='rounded-lg overflow-hidden'>
-              <thead>
-                <tr>
-                  <th>Loan ID</th>
-                  <th>Member No.</th>
-                  <th>Member</th>
-                  <th>Total Due</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.map((row) => (
-                  <tr key={row.id}>
-                    <td>{row.loanId}</td>
-                    <td>{row.memberNo}</td>
-                    <td>{row.member}</td>
-                    <td>{row.totalDue}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </Container>
-      </div>
-    </div>
+  </div>
   );
 }

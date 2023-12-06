@@ -36,6 +36,39 @@ const DropDown = ({ currentMode }) => (
 
 const Ecommerce = () => {
   const { currentColor, currentMode } = useStateContext();
+  const [totalMembers, setTotalMembers] = useState();
+  const [depositRequests, setDepositRequests] = useState();
+  const [withdrawRequests, setWithdrawRequests] = useState();
+  const [pendingLoans, setPendingLoans] = useState();
+  const [transactions, setTransactions] = useState([]);
+
+  // Fetch data for total members, deposit requests, withdraw requests, and pending loans
+  const fetchData = async () => {
+    try {
+      const membersResponse = await axios.get('http://localhost:3001/countMembers');
+      setTotalMembers(membersResponse.data.count);
+
+      const depositResponse = await axios.get('http://localhost:3001/depositRequestsPending');
+      setDepositRequests(depositResponse.data.count);
+
+      const withdrawResponse = await axios.get('http://localhost:3001/withdrawRequestsPending');
+      setWithdrawRequests(withdrawResponse.data.count);
+
+      const loansResponse = await axios.get('http://localhost:3001/pendingLoans');
+      setPendingLoans(loansResponse.data.data.length);
+
+      const transactionsResponse = await axios.get('http://localhost:3001/transactions');
+      setTransactions(transactionsResponse.data.data);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch data on component mount
+    fetchData();
+  }, []);
 
   return (
     <div className="mt-18">

@@ -1,8 +1,6 @@
 import React, { useState,useEffect } from 'react';
 import { Modal, Button, Form, Table } from 'react-bootstrap';
 import axios from 'axios';
-import React, { useState } from "react";
-import { Modal, Button, Form, Table } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
 const Members = () => {
