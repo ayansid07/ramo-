@@ -144,31 +144,7 @@ const Ecommerce = () => {
               <th>Debit/Credit</th>
               <th>Type</th>
               <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          {/* <tbody class="table-success">
-          {data.map(()=>{
-            return(
-              <tr key={i}>
-                <td> <h3>dfghj</h3> </td>
-                <td> {} </td>
-                <td> {} </td>
-                <td> {} </td>
-      
-
-      <div>
-        <table className='table text-center bg-info text-white'>
-          <thead>
-            <tr class="table-secondary">
-              <th>Date</th>
-              <th>Member</th>
-              <th>Account Number</th>
-              <th>Amount</th>
-              <th>Debit/Credit</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Action</th>
+              {/* <th>Action</th> */}
             </tr>
           </thead>
           <tbody className="table-success">
@@ -181,7 +157,7 @@ const Ecommerce = () => {
                 <td>{transaction.debitOrCredit}</td>
                 <td>{transaction.type}</td>
                 <td>{transaction.status}</td>
-                <td>{/* Render action button or data */}</td>
+                {/* <td>Render action button or data</td> */}
               </tr>
             ))}
           </tbody>
