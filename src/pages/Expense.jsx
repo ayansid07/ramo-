@@ -8,10 +8,10 @@ const Expense = () => {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date(),
-    category: '',
-    amount: '',
-    reference: '',
-    note: '',
+    category: "",
+    amount: "",
+    reference: "",
+    note: "",
   });
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -68,6 +68,7 @@ const Expense = () => {
   const handleModalShow = () => setShowModal(true);
   const handleModalClose = () => {
     setShowModal(false);
+    // Reset form data when the modal is closed
     setFormData({
       date: new Date(),
       category: '',
@@ -96,13 +97,13 @@ const Expense = () => {
   };
 
   return (
-    <div className='body-div'>
-      <div style={{marginBottom:'3px'}}>
-      <Button variant="primary" onClick={handleModalShow}>
-        Add Expense
-      </Button>  
+    <div className="body-div">
+      <div style={{ marginBottom: "3px" }}>
+        <Button variant="primary" onClick={handleModalShow}>
+          Add Expense
+        </Button>
       </div>
-      <br/>
+      <br />
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>Add Expense</Modal.Title>
@@ -111,10 +112,14 @@ const Expense = () => {
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="date">
               <Form.Label>Date</Form.Label>
-              <DatePicker
-                selected={formData.date}
-                onChange={handleDateChange}
-                dateFormat="yyyy-MM-dd"
+              <Form.Control
+                type="date"
+                name="date"
+                value={formData.date.toISOString().split("T")[0]}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
+                  handleDateChange(date);
+                }}
               />
             </Form.Group>
             <Form.Group controlId="category">
@@ -187,7 +192,7 @@ const Expense = () => {
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover>
+      <Table striped bordered hover className="rounded-lg overflow-hidden">
         <thead>
           <tr>
             <th>Date</th>

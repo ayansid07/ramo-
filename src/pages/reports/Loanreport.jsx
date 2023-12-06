@@ -102,7 +102,7 @@ return (
 
 <h2>Loan Report</h2>
 
-<Table striped bordered hover className="mt-2">
+<Table striped bordered hover className="mt-2 rounded-lg overflow-hidden">
   <thead>
     <tr>
       <th>Loan ID</th>

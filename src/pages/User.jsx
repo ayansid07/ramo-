@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import axios from 'axios';
 import { Modal, Button, Form, Table, Badge } from 'react-bootstrap';
+import { FaEdit,FaTrash } from 'react-icons/fa';
 
 const User = () => {
   const [showModal, setShowModal] = useState(false);
@@ -354,7 +355,92 @@ const User = () => {
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover className="mt-4">
+      <Modal show={showeditModal} onHide={handleCloseeditModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Update User</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleEdit}>
+
+          <Form.Group controlId="formName">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formEmail">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Enter password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formUserType">
+              <Form.Label>User Type</Form.Label>
+              <Form.Control
+                as="select"
+                name="userType"
+                value={formData.userType}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select User Type</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="formStatus">
+              <Form.Label>Status</Form.Label>
+              <Form.Control
+                as="select"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </Form.Control>
+            </Form.Group>
+      
+            <Form.Group controlId="formImage">
+              <Form.Label>Image</Form.Label>
+              <Form.Control
+                type="file"
+                accept="image/*"
+                name="image"
+                onChange={handleImageChange}
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Update
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      <Table striped bordered hover className="mt-4 rounded-lg overflow-hidden">
         <thead>
           <tr>
             <th>Image</th>
@@ -390,10 +476,10 @@ const User = () => {
               </td>
               <td>
                 <Button variant="warning" onClick={() => handleEditModalOpen(user._id)}>
-                  Edit
+                  <FaEdit/>
                 </Button>{' '}
                 <Button variant="danger" onClick={() => handleDelete(user._id)}>
-                  Delete
+                  <FaTrash/>
                 </Button>
               </td>
             </tr>

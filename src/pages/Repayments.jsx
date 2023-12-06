@@ -1,16 +1,16 @@
 // Repayments.jsx
 
-import React, { useState,useEffect } from 'react';
-import { Modal, Button, Form, Table, FormControl } from 'react-bootstrap';
-import DatePicker from 'react-datepicker';
+import React, { useState,useEffect } from "react";
+import { Modal, Button, Form, Table, FormControl } from "react-bootstrap";
+import DatePicker from "react-datepicker";
 import axios from 'axios';
-import 'react-datepicker/dist/react-datepicker.css';
+import "react-datepicker/dist/react-datepicker.css";
 
 const Repayments = () => {
   const [showModal, setShowModal] = useState(false);
   const [approvedLoanIds, setApprovedLoanIds] = useState([]);
   const [formData, setFormData] = useState({
-    loanId: '',
+    loanId: "",
     paymentDate: new Date(),
     dueDate: new Date(),
     dueAmount: 0,
@@ -21,13 +21,13 @@ const Repayments = () => {
   });
   const [repaymentsData, setRepaymentsData] = useState([]);
   const [filteredRepayments, setFilteredRepayments] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => {
     setShowModal(false);
     setFormData({
-      loanId: '',
+      loanId: "",
       paymentDate: new Date(),
       dueDate: new Date(),
       dueAmount: 0,
@@ -42,7 +42,7 @@ const Repayments = () => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: name === 'loanId' ? value : parseFloat(value),
+      [name]: name === "loanId" ? value : parseFloat(value),
     }));
   };
 
@@ -102,7 +102,7 @@ const Repayments = () => {
   }, [searchTerm, repaymentsData]);
     
   return (
-    <div className='body-div'>
+    <div className="body-div">
       <div className="d-flex mb-2">
         <Button className="mr-2" onClick={handleOpenModal}>
           Add Repayment
@@ -139,30 +139,33 @@ const Repayments = () => {
           </Form.Group>
             <Form.Group controlId="formPaymentDate">
               <Form.Label>Payment Date</Form.Label>
-              <br />
-              <DatePicker
-                selected={formData.paymentDate}
-                onChange={(date) =>
+              <Form.Control
+                type="date"
+                name="paymentDate"
+                value={formData.paymentDate.toISOString().split("T")[0]}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
                   setFormData((prevData) => ({
                     ...prevData,
                     paymentDate: date,
-                  }))
-                }
-                dateFormat="MM/dd/yyyy"
+                  }));
+                }}
               />
             </Form.Group>
+
             <Form.Group controlId="formDueDate">
               <Form.Label>Due Date</Form.Label>
-              <br />
-              <DatePicker
-                selected={formData.dueDate}
-                onChange={(date) =>
+              <Form.Control
+                type="date"
+                name="dueDate"
+                value={formData.dueDate.toISOString().split("T")[0]}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
                   setFormData((prevData) => ({
                     ...prevData,
                     dueDate: date,
-                  }))
-                }
-                dateFormat="MM/dd/yyyy"
+                  }));
+                }}
               />
             </Form.Group>
             <Form.Group controlId="formDueAmount">
@@ -222,7 +225,7 @@ const Repayments = () => {
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover className="mt-4">
+      <Table striped bordered hover className="mt-4 rounded-lg overflow-hidden">
         <thead>
           <tr>
             <th>Loan ID</th>

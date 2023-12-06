@@ -1,6 +1,8 @@
 import React, { useState,useEffect } from 'react';
 import axios from 'axios';
 import { Modal, Button, Form, Table, Alert, InputGroup, FormControl } from 'react-bootstrap';
+import { FaEdit, FaTrash } from "react-icons/fa";
+
 
 const Branches = () => {
   const [showModal, setShowModal] = useState(false);
@@ -227,71 +229,12 @@ const Branches = () => {
           </Form>
         </Modal.Body>
       </Modal>
-      
-      {/* Edit Branch Modal */}
-      <Modal show={showEditModal} onHide={handleCloseEditModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Branch</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleUpdate}>
-          <Form.Group controlId="formID">
-            <Form.Label>ID</Form.Label>
-            <Form.Control 
-              type="integer"
-              placeholder='Enter Id'
-              name='branchId'
-              value={formData.branchId}
-              onChange={handleInputChange}
-              readOnly
-            />
-          </Form.Group>
-          <Form.Group controlId="formName">
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter name"
-                name="branchName"
-                value={formData.branchName}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="formEmail">
-              <Form.Label>Email </Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter email"
-                name="contactemail"
-                value={formData.contactemail}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="formPhone">
-              <Form.Label>Phone </Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Enter phone number"
-                name="contactphone"
-                value={formData.contactphone}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="formAddress">
-              <Form.Label> Address</Form.Label>
-              <Form.Control
-                type="textarea"
-                placeholder="Enter address"
-                name="branchaddress"
-                value={formData.branchaddress}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit">Update</Button>
-          </Form>
-        </Modal.Body>
-      </Modal>
 
-      <Table striped bordered hover className="mt-4">
+      <Alert show={showAlert} variant={alertVariant} onClose={() => setShowAlert(false)} dismissible>
+        {alertVariant === 'success' ? 'Success! Operation completed.' : 'Error! Something went wrong.'}
+      </Alert>
+
+      <Table responsive striped bordered hover className="mt-4 rounded-lg overflow-hidden">
         <thead>
           <tr>
             <th>Unique Branch ID</th>
@@ -311,11 +254,11 @@ const Branches = () => {
               <td>{member.contactphone}</td>
               <td>{member.branchaddress}</td>
               <td>
-                <Button variant="warning" onClick={() => handleOpenEditModal(member._id)}>
-                  Edit
+                <Button variant="warning" onClick={() => handleEdit(index)}>
+                  <FaEdit/>
                 </Button>{' '}
-                <Button variant="Deleted Succcessfully" onClick={() => handleDelete(member._id)}>
-                  Delete
+                <Button variant="danger" onClick={() => handleDelete(index)}>
+                  <FaTrash/>
                 </Button>
               </td>
             </tr>

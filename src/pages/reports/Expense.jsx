@@ -152,7 +152,7 @@ useEffect(() => {
           </Row>
 
           {/* Expense Table */}
-          <Table striped bordered hover className="mt-2">
+          <Table striped bordered hover className="mt-2 rounded-lg overflow-hidden">
             <thead>
               <tr>
                 <th>Date</th>

@@ -129,7 +129,7 @@ export default function Transaction() {
           <hr className="my-4" />
 
           {/* Transaction Table */}
-          <Table striped bordered hover className="mt-2">
+          <Table striped bordered hover className="mt-2 rounded-lg overflow-hidden">
             <thead>
             <th>Date</th>
             <th>Member</th>

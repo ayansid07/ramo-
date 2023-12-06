@@ -1,6 +1,9 @@
 import React, { useState,useEffect } from 'react';
 import { Modal, Button, Form, Table } from 'react-bootstrap';
 import axios from 'axios';
+import React, { useState } from "react";
+import { Modal, Button, Form, Table } from "react-bootstrap";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const Members = () => {
   const [showModal, setShowModal] = useState(false);
@@ -154,7 +157,7 @@ const Members = () => {
   };
 
   return (
-    <div className='body-div'>
+    <div className="body-div">
       <Button onClick={handleOpenModal}>Add Member</Button>
 
       <Modal show={showModal} onHide={handleCloseModal}>
@@ -163,6 +166,7 @@ const Members = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
+          
             <Form.Group controlId="formMemberNo">
               <Form.Label>Member No</Form.Label>
               <Form.Control
@@ -304,7 +308,7 @@ const Members = () => {
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover className="mt-4">
+      <Table responsive striped bordered hover className="mt-4 rounded-lg overflow-hidden ">
         <thead>
           <tr>
             <th>Unique Table Object ID</th>
@@ -327,10 +331,10 @@ const Members = () => {
               <td>{member.branchName}</td>
               <td>
                 <Button variant="warning" onClick={() => handleOpenEditModal(member._id)}>
-                  Edit
-                </Button>{' '}
+                  <FaEdit />
+                </Button>{" "}
                 <Button variant="danger" onClick={() => handleDelete(member._id)}>
-                  Delete
+                  <FaTrash />
                 </Button>
               </td>
             </tr>

@@ -319,7 +319,7 @@ const Accounts = () => {
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover className="mt-4">
+      <Table striped bordered hover className="mt-4 rounded-lg overflow-hidden">
         <thead>
           <tr>
             <th>Unique Table ID</th>
@@ -342,7 +342,7 @@ const Accounts = () => {
               <td>{account.openingBalance}</td>
               <td>
                 <Dropdown>
-                  <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  <Dropdown.Toggle className='btn-secondry' variant="secondary" id="dropdown-basic">
                     Action
                   </Dropdown.Toggle>
                   <Dropdown.Menu>

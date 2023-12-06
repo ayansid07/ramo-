@@ -24,7 +24,7 @@ const Doughnut = ({ id, data, legendVisiblity, height }) => {
           innerRadius="40%"
           startAngle={0}
           endAngle={360}
-          radius="70%"
+          radius="100%"
           explode
           explodeOffset="10%"
           explodeIndex={2}

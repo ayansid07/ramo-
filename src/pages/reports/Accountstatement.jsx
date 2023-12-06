@@ -35,6 +35,13 @@ const AccountStatement = () => {
     fetchData();
   };
 
+  const handleExportToPDF = () => {
+    const blob = new Blob([<MyDocument data={data} />], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'AccStatement.pdf';
+    link.click();
+  };
   return (
     <div>
       <Reports />
@@ -73,15 +80,21 @@ const AccountStatement = () => {
                   <Button variant="primary" type="submit" className="mt-8">
                     Search
                   </Button>
-                </Col>
-              </Row>
+                   <Button variant="danger" onClick={handleExportToPDF}>
+                  Export to PDF
+                </Button>
+
+              </Col>
+                
+            </Row>
             </Form>
           </Col>
         </Row>
 
-        <hr />
+      <hr />
+      <br/>
 
-        <Table striped bordered hover>
+        <Table striped bordered hover className='rounded-lg overflow-hidden'>
           <thead>
             <tr>
               <th>Date</th>

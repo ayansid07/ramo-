@@ -1,17 +1,22 @@
 // Loans.jsx
-import React, { useState,useEffect } from 'react';
-import { Modal, Button, Form, Table, FormControl } from 'react-bootstrap';
-import DatePicker from 'react-datepicker';
+import React, { useState,useEffect } from "react";
+import { Modal, Button, Form, Table, FormControl } from "react-bootstrap";
+import DatePicker from "react-datepicker";
 import axios from 'axios';
-import 'react-datepicker/dist/react-datepicker.css';
+import "react-datepicker/dist/react-datepicker.css";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { parseISO } from 'date-fns';
 
 const Loans = () => {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    loanId: '',account: '', loanProduct: '',borrower: '',
-    memberNo: '',releaseDate: new Date(), // Default date
-    appliedAmount: '',status: 'Pending',
+    loanId: '',
+    loanProduct: '',
+    borrower: '',
+    memberNo: '',
+    releaseDate: new Date(), // Default date
+    appliedAmount: '',
+    status: 'Pending',
   });
   const [loansData, setLoansData] = useState([]);
   const [selectedLoanIndex, setSelectedLoanIndex] = useState(null);
@@ -216,20 +221,25 @@ const Loans = () => {
   }, [searchTerm, loansData]);
 
   return (
-    <div className='body-div'>
+    <div className="body-div">
       <div className="d-flex mb-2">
-        <Button className="mr-2" onClick={() => { setFormData({}); handleOpenModal(); }}>
+        <Button
+          className="mr-2"
+          onClick={() => {
+            setFormData({});
+            handleOpenModal();
+          }}
+        >
           Add Loan
         </Button>
         <FormControl
-          className='custom-search-bar'
+          className="custom-search-bar"
           type="text"
           placeholder="Search..."
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-    
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>Add Loan</Modal.Title>
@@ -306,11 +316,11 @@ const Loans = () => {
           </Form.Group>
             <Form.Group controlId="formReleaseDate">
               <Form.Label>Release Date</Form.Label>
-              <br />
-              <DatePicker
-                selected={formData.releaseDate}
-                onChange={handleDateChange}
-                dateFormat="MM/dd/yyyy"
+              <Form.Control
+                type="date"
+                name="releaseDate"
+                // value={formData.releaseDate.toISOString().split("T")[0]} // Format the date as YYYY-MM-DD
+                onChange={handleInputChange}
               />
             </Form.Group>
             <Form.Group controlId="formAppliedAmount">
@@ -331,7 +341,7 @@ const Loans = () => {
                   type="radio"
                   label="Approved"
                   value="Approved"
-                  checked={formData.status === 'Approved'}
+                  checked={formData.status === "Approved"}
                   onChange={handleStatusChange}
                 />
                 <Form.Check
@@ -339,7 +349,7 @@ const Loans = () => {
                   type="radio"
                   label="Pending"
                   value="Pending"
-                  checked={formData.status === 'Pending'}
+                  checked={formData.status === "Pending"}
                   onChange={handleStatusChange}
                 />
                 <Form.Check
@@ -347,7 +357,7 @@ const Loans = () => {
                   type="radio"
                   label="Cancelled"
                   value="Cancelled"
-                  checked={formData.status === 'Cancelled'}
+                  checked={formData.status === "Cancelled"}
                   onChange={handleStatusChange}
                 />
               </div>
@@ -496,12 +506,17 @@ const Loans = () => {
             <Button variant="primary" type="submit">
               Update
             </Button>
-           
           </Form>
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover className="mt-4">
+      <Table
+        responsive
+        striped
+        bordered
+        hover
+        className="mt-4 rounded-lg overflow-hidden"
+      >
         <thead>
           <tr>
             <th>Unique Table ID</th>
@@ -531,11 +546,11 @@ const Loans = () => {
           <td>{loan.status}</td>
           
               <td>
-                <Button variant="info" onClick={() => handleOpenEditModal(loan._id)}>
-                  Edit
-                </Button>{' '}
+                <Button variant="warning" onClick={() => handleOpenEditModal(loan._id)}>
+                  <FaEdit />
+                </Button>{" "}
                 <Button variant="danger" onClick={() => handleDelete(loan._id)}>
-                  Delete
+                  <FaTrash />
                 </Button>
               </td>
             </tr>
