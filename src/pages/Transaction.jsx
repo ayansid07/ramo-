@@ -1,6 +1,7 @@
 // Transaction.jsx
 
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Form, Button, Container } from 'react-bootstrap';
 import './depositform.css'
 
@@ -17,51 +18,36 @@ const Transaction = () => {
 
   const [members, setMembers] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  const [transactionTypes, setTransactionTypes] = useState([]);
+  // const [transactionTypes, setTransactionTypes] = useState([]);
 
-  useEffect(() => {
-    // Fetch members from API
-    fetchMembers();
+  const fetchData = async () => {
+      try {
+        const memberResponse = await axios.get('http://localhost:3001/readmemberids');
+        setMembers(memberResponse.data.data);
+        // console.log('Member IDs Status:', memberResponse);
 
-    // Fetch accounts from API
-    fetchAccounts();
+        const accountResponse = await axios.get('http://localhost:3001/readaccountnumbers');
+        setAccounts(accountResponse.data);
+        // console.log('Account Numbers Status:', accountResponse);
+      } catch (error) {
+        // console.error('Error fetching data:', error);
+      }
+    };
 
-    // Fetch transaction types from API
-    fetchTransactionTypes();
-  }, []);
-
-  const fetchMembers = async () => {
-    try {
-      // Replace 'your-members-api-endpoint' with the actual API endpoint for members
-      const response = await fetch('your-members-api-endpoint');
-      const data = await response.json();
-      setMembers(data); // Assuming data is an array of members
-    } catch (error) {
-      console.error('Error fetching members:', error);
-    }
-  };
-
-  const fetchAccounts = async () => {
-    try {
-      // Replace 'your-accounts-api-endpoint' with the actual API endpoint for accounts
-      const response = await fetch('your-accounts-api-endpoint');
-      const data = await response.json();
-      setAccounts(data); // Assuming data is an array of accounts
-    } catch (error) {
-      console.error('Error fetching accounts:', error);
-    }
-  };
-
-  const fetchTransactionTypes = async () => {
-    try {
-      // Replace 'your-transaction-types-api-endpoint' with the actual API endpoint for transaction types
-      const response = await fetch('your-transaction-types-api-endpoint');
-      const data = await response.json();
-      setTransactionTypes(data); // Assuming data is an array of transaction types
-    } catch (error) {
-      console.error('Error fetching transaction types:', error);
-    }
-  };
+  useEffect(  () => {
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only once on component mount
+ 
+  // const fetchTransactionTypes = async () => {
+  //   try {
+  //     // Replace 'your-transaction-types-api-endpoint' with the actual API endpoint for transaction types
+  //     const response = await fetch('your-transaction-types-api-endpoint');
+  //     const data = await response.json();
+  //     setTransactionTypes(data); // Assuming data is an array of transaction types
+  //   } catch (error) {
+  //     console.error('Error fetching transaction types:', error);
+  //   }
+  // };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,10 +57,28 @@ const Transaction = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add logic to send form data to your API
-    console.log(formData);
+    try {
+      // Send form data to your API endpoint to create a transaction
+      const response = await axios.post('http://localhost:3001/transactions', formData);
+      // console.log(response);
+      
+      // Reset form fields after successful submission if needed
+      setFormData({
+        date: '',
+        member: '',
+        accountNumber: '',
+        transactionAmount: '',
+        debitOrCredit: '',
+        status: '',
+        description: ''
+      });
+      fetchData();
+    } catch (error) {
+      // console.error('Error creating transaction:', error);
+    }
+    // console.log(formData);
   };
 
   return (
@@ -106,7 +110,7 @@ const Transaction = () => {
             <option value="">Select Member</option>
             {members.map((member) => (
               <option key={member.id} value={member.id}>
-                {member.name}
+                {member.id}
               </option>
             ))}
           </Form.Control>
@@ -122,31 +126,31 @@ const Transaction = () => {
             required
           >
             <option value="">Select Account</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.accountNumber}>
-                {account.accountNumber}
+            {accounts.map((accountNumber) => (
+              <option key={accountNumber} value={accountNumber}>
+                {accountNumber}
               </option>
             ))}
           </Form.Control>
         </Form.Group>
-        <Form.Group controlId="amount">
-          <Form.Label  className="custom-form-label">Amount *</Form.Label>
+        <Form.Group controlId="transactionAmount">
+          <Form.Label  className="custom-form-label">Transaction Amount *</Form.Label>
           <Form.Control
           className="custom-form-control"
             type="number"
-            name="amount"
-            value={formData.amount}
+            name="transactionAmount"
+            value={formData.transactionAmount}
             onChange={handleInputChange}
             required
           />
         </Form.Group>
-        <Form.Group controlId="transactionType">
+        <Form.Group controlId="debitOrCredit">
           <Form.Label  className="custom-form-label">Debit/Credit *</Form.Label>
           <Form.Control
           className="custom-form-control"
             as="select"
-            name="transactionType"
-            value={formData.transactionType}
+            name="debitOrCredit"
+            value={formData.debitOrCredit}
             onChange={handleInputChange}
             required
           >
@@ -165,6 +169,7 @@ const Transaction = () => {
             onChange={handleInputChange}
             required
           >
+            <option value="">Please Select an Option</option>
             <option value="Completed">Completed</option>
             <option value="Pending">Pending</option>
             <option value="Cancelled">Cancelled</option>

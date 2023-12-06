@@ -37,27 +37,27 @@ const App = () => {
 
   // For Password based System
   const [authenticated, setAuthenticated] = useState(false);
-  // Production Code
-  useEffect(() => {
-    // Check if a valid token exists in local storage
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Verify the token on the server to check its validity
-      axios.get('http://localhost:3001/verify-token', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(() => {
-          // Token is valid, user is authenticated
-          setAuthenticated(true);
+    // Production Code
+    useEffect(() => {
+      // Check if a valid token exists in local storage
+      const token = localStorage.getItem('token');
+      if (token) {
+        // Verify the token on the server to check its validity
+        axios.get('http://localhost:3001/verify-token', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
-        .catch(() => {
-          // Token is invalid, remove it from local storage
-          localStorage.removeItem('token');
-        });
-    }
-  }, []);
+          .then(() => {
+            // Token is valid, user is authenticated
+            setAuthenticated(true);
+          })
+          .catch(() => {
+            // Token is invalid, remove it from local storage
+            localStorage.removeItem('token');
+          });
+      }
+    }, []);
   return (
     <BrowserRouter>
       {authenticated ? (

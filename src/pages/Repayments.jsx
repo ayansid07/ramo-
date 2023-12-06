@@ -1,22 +1,26 @@
 // Repayments.jsx
 
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Modal, Button, Form, Table, FormControl } from "react-bootstrap";
 import DatePicker from "react-datepicker";
+import axios from 'axios';
 import "react-datepicker/dist/react-datepicker.css";
 
 const Repayments = () => {
   const [showModal, setShowModal] = useState(false);
+  const [approvedLoanIds, setApprovedLoanIds] = useState([]);
   const [formData, setFormData] = useState({
     loanId: "",
     paymentDate: new Date(),
     dueDate: new Date(),
+    dueAmount: 0,
     principalAmount: 0,
     interest: 0,
     latePenalties: 0,
     totalAmount: 0,
   });
   const [repaymentsData, setRepaymentsData] = useState([]);
+  const [filteredRepayments, setFilteredRepayments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleOpenModal = () => setShowModal(true);
@@ -26,6 +30,7 @@ const Repayments = () => {
       loanId: "",
       paymentDate: new Date(),
       dueDate: new Date(),
+      dueAmount: 0,
       principalAmount: 0,
       interest: 0,
       latePenalties: 0,
@@ -41,19 +46,60 @@ const Repayments = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setRepaymentsData((prevData) => [...prevData, formData]);
-    handleCloseModal();
+    try {  
+      const response = await axios.post('http://localhost:3001/repayments', formData);
+      // console.log('Data Successfully entered in Backend Server', response.data.data);
+      fetchData();
+      handleCloseModal();
+      setFormData({
+        loanId: '',
+        paymentDate: new Date(),
+        dueDate: new Date(),
+        dueAmount: 0,
+        principalAmount: 0,
+        interest: 0,
+        latePenalties: 0,
+        totalAmount: 0,
+      });  
+    } catch (error) {
+      // console.error('Some Error in submitting the form data to backend:', error);
+      handleCloseModal();
+    }
+  };
+  
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/repayments');
+      setRepaymentsData(response.data.data);
+    } catch (error) {
+      // console.error('Error fetching repayments:', error);
+      // Handle error or display an error message to the user
+    }
+    try {
+      const response = await axios.get('http://localhost:3001/approvedLoans');
+      const data = response.data.data;
+      setApprovedLoanIds(data);
+      // console.log('Approved Loan Id',data);
+    } catch (error) {
+      // console.error('Error fetching approved loan IDs:', error);
+    }
   };
 
-  const filteredRepayments = repaymentsData.filter((repayment) =>
-    Object.values(repayment).some(
-      (value) =>
-        typeof value === "number" && value.toString().includes(searchTerm)
-    )
-  );
-
+  useEffect(() => {
+    // Fetch data initially on component mount
+    fetchData();
+  }, []);
+  
+  useEffect(() => {
+    const filteredRepayments = repaymentsData.filter((repayment) =>
+      repayment.loanId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  
+    setFilteredRepayments(filteredRepayments);
+  }, [searchTerm, repaymentsData]);
+    
   return (
     <div className="body-div">
       <div className="d-flex mb-2">
@@ -74,16 +120,22 @@ const Repayments = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="formLoanId">
-              <Form.Label>Loan ID</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter loan ID"
-                name="loanId"
-                value={formData.loanId}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+          <Form.Group controlId="formLoanId">
+            <Form.Label>Loan ID</Form.Label>
+            <Form.Control
+              as="select"
+              name="loanId"
+              value={formData.loanId}
+              onChange={handleInputChange}
+            >
+              <option value="">Select a Loan ID</option>
+              {approvedLoanIds.map((loan) => (
+                <option key={loan._id} value={loan.loanId}>
+                  {loan.loanId}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
             <Form.Group controlId="formPaymentDate">
               <Form.Label>Payment Date</Form.Label>
               <Form.Control
@@ -113,6 +165,16 @@ const Repayments = () => {
                     dueDate: date,
                   }));
                 }}
+              />
+            </Form.Group>
+            <Form.Group controlId="formDueAmount">
+              <Form.Label>Due Amount</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter Due amount"
+                name="dueAmount"
+                value={formData.dueAmount}
+                onChange={handleInputChange}
               />
             </Form.Group>
             <Form.Group controlId="formPrincipalAmount">
@@ -168,6 +230,7 @@ const Repayments = () => {
             <th>Loan ID</th>
             <th>Payment Date</th>
             <th>Due Date</th>
+            <th>Due Amount</th>
             <th>Principal Amount</th>
             <th>Interest</th>
             <th>Late Penalties</th>
@@ -180,6 +243,7 @@ const Repayments = () => {
               <td>{repayment.loanId}</td>
               <td>{new Date(repayment.paymentDate).toLocaleDateString()}</td>
               <td>{new Date(repayment.dueDate).toLocaleDateString()}</td>
+              <td>{repayment.dueAmount}</td>
               <td>{repayment.principalAmount}</td>
               <td>{repayment.interest}</td>
               <td>{repayment.latePenalties}</td>

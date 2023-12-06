@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect,useState } from "react";
 import { BsCurrencyDollar } from "react-icons/bs";
 import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosMore } from "react-icons/io";
@@ -18,6 +18,7 @@ import {
 import { useStateContext } from "../contexts/ContextProvider";
 import product9 from "../data/product9.jpg";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const DropDown = ({ currentMode }) => (
   <div className="w-28 border-1 border-color px-2 py-1 rounded-md">
@@ -35,8 +36,39 @@ const DropDown = ({ currentMode }) => (
 
 const Ecommerce = () => {
   const { currentColor, currentMode } = useStateContext();
+  const [totalMembers, setTotalMembers] = useState();
+  const [depositRequests, setDepositRequests] = useState();
+  const [withdrawRequests, setWithdrawRequests] = useState();
+  const [pendingLoans, setPendingLoans] = useState();
+  const [transactions, setTransactions] = useState([]);
 
-  const navigate = useNavigate();
+  // Fetch data for total members, deposit requests, withdraw requests, and pending loans
+  const fetchData = async () => {
+    try {
+      const membersResponse = await axios.get('http://localhost:3001/countMembers');
+      setTotalMembers(membersResponse.data.count);
+
+      const depositResponse = await axios.get('http://localhost:3001/depositRequestsPending');
+      setDepositRequests(depositResponse.data.count);
+
+      const withdrawResponse = await axios.get('http://localhost:3001/withdrawRequestsPending');
+      setWithdrawRequests(withdrawResponse.data.count);
+
+      const loansResponse = await axios.get('http://localhost:3001/pendingLoans');
+      setPendingLoans(loansResponse.data.data.length);
+
+      const transactionsResponse = await axios.get('http://localhost:3001/transactions');
+      setTransactions(transactionsResponse.data.data);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch data on component mount
+    fetchData();
+  }, []);
 
   return (
     <div className="mt-18">
@@ -45,7 +77,7 @@ const Ecommerce = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className="font-bold text-gray-400">Total Members</p>
-              <p className="text-2xl">11</p>
+              <p className="text-2xl">{totalMembers}</p>
             </div>
           </div>
           <div className="mt-6">
@@ -62,7 +94,7 @@ const Ecommerce = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className="font-bold text-gray-400">Deposit Request</p>
-              <p className="text-2xl">10</p>
+              <p className="text-2xl">{depositRequests}</p>
             </div>
           </div>
           <div className="mt-6">
@@ -78,7 +110,7 @@ const Ecommerce = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className="font-bold text-gray-400">Withdraw Request</p>
-              <p className="text-2xl">34</p>
+              <p className="text-2xl">{withdrawRequests}</p>
             </div>
           </div>
           <div className="mt-6">
@@ -94,7 +126,7 @@ const Ecommerce = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className="font-bold text-gray-400">Pending Loans</p>
-              <p className="text-2xl">4</p>
+              <p className="text-2xl">{pendingLoans}</p>
             </div>
           </div>
           <div className="mt-6">
@@ -145,22 +177,24 @@ const Ecommerce = () => {
               <th>Debit/Credit</th>
               <th>Type</th>
               <th>Status</th>
-              <th>Action</th>
+              {/* <th>Action</th> */}
             </tr>
           </thead>
-          {/* <tbody class="table-success">
-          {data.map(()=>{
-            return(
-              <tr key={i}>
-                <td> <h3>dfghj</h3> </td>
-                <td> {} </td>
-                <td> {} </td>
-                <td> {} </td>
+          <tbody className="table-success">
+            {transactions.slice(0,10).map((transaction, index) => (
+              <tr key={index}>
+                <td>{transaction.date}</td>
+                <td>{transaction.member}</td>
+                <td>{transaction.accountNumber}</td>
+                <td>{transaction.transactionAmount}</td>
+                <td>{transaction.debitOrCredit}</td>
+                <td>{transaction.type}</td>
+                <td>{transaction.status}</td>
+                {/* <td>Render action button or data</td> */}
               </tr>
-            )
-          })}
-        </tbody> */}
-        </table>
+            ))}
+          </tbody>
+          </table>
       </div>
     </div>
   );

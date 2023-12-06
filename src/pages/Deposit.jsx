@@ -1,164 +1,5 @@
-// // Deposit.jsx
-
-// import React, { useState, useEffect } from 'react';
-// import { Form, Button, Container } from 'react-bootstrap';
-
-
-// const Deposit = () => {
-//   const [formData, setFormData] = useState({
-//     date: '',
-//     member: '',
-//     accountNumber: '',
-//     amount: '',
-//     status: 'Completed',
-//     description: '',
-//   });
-
-//   const [members, setMembers] = useState([]);
-//   const [accounts, setAccounts] = useState([]);
-
-//   useEffect(() => {
-//     // Fetch members from API
-//     fetchMembers();
-
-//     // Fetch accounts from API
-//     fetchAccounts();
-//   }, []);
-
-//   const fetchMembers = async () => {
-//     try {
-//       // Replace 'your-members-api-endpoint' with the actual API endpoint for members
-//       const response = await fetch('your-members-api-endpoint');
-//       const data = await response.json();
-//       setMembers(data); // Assuming data is an array of members
-//     } catch (error) {
-//       console.error('Error fetching members:', error);
-//     }
-//   };
-
-//   const fetchAccounts = async () => {
-//     try {
-//       // Replace 'your-accounts-api-endpoint' with the actual API endpoint for accounts
-//       const response = await fetch('your-accounts-api-endpoint');
-//       const data = await response.json();
-//       setAccounts(data); // Assuming data is an array of accounts
-//     } catch (error) {
-//       console.error('Error fetching accounts:', error);
-//     }
-//   };
-
-//   const handleInputChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prevData) => ({
-//       ...prevData,
-//       [name]: value,
-//     }));
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     // Add logic to send form data to your API
-//     console.log(formData);
-//   };
-
-//   return (
-//     <div className='body-div'>
-//     <Container>
-//       <Form onSubmit={handleSubmit}>
-//         <Form.Group controlId="date">
-//           <Form.Label>Date *</Form.Label>
-//           <Form.Control
-          
-//             type="date"
-//             name="date"
-//             value={formData.date}
-//             onChange={handleInputChange}
-//             required
-//           />
-//         </Form.Group>
-//         <Form.Group controlId="member">
-//           <Form.Label>Member *</Form.Label>
-//           <Form.Control
-//             as="select"
-//             name="member"
-//             value={formData.member}
-//             onChange={handleInputChange}
-//             required
-//           >
-//             <option value="">Select Member</option>
-//             {members.map((member) => (
-//               <option key={member.id} value={member.id}>
-//                 {member.name}
-//               </option>
-//             ))}
-//           </Form.Control>
-//         </Form.Group>
-//         <Form.Group controlId="accountNumber">
-//           <Form.Label>Account Number *</Form.Label>
-//           <Form.Control
-//             as="select"
-//             name="accountNumber"
-//             value={formData.accountNumber}
-//             onChange={handleInputChange}
-//             required
-//           >
-//             <option value="">Select Account</option>
-//             {accounts.map((account) => (
-//               <option key={account.id} value={account.accountNumber}>
-//                 {account.accountNumber}
-//               </option>
-//             ))}
-//           </Form.Control>
-//         </Form.Group>
-//         <Form.Group controlId="amount">
-//           <Form.Label>Amount *</Form.Label>
-//           <Form.Control
-//             type="number"
-//             name="amount"
-//             value={formData.amount}
-//             onChange={handleInputChange}
-//             required
-//           />
-//         </Form.Group>
-//         <Form.Group controlId="status">
-//           <Form.Label>Status *</Form.Label>
-//           <Form.Control
-//             as="select"
-//             name="status"
-//             value={formData.status}
-//             onChange={handleInputChange}
-//             required
-//           >
-//             <option value="Completed">Completed</option>
-//             <option value="Pending">Pending</option>
-//             <option value="Cancelled">Cancelled</option>
-//           </Form.Control>
-//         </Form.Group>
-//         <Form.Group controlId="description">
-//           <Form.Label>Description *</Form.Label>
-//           <Form.Control
-//             as="textarea"
-//             rows={4}
-//             name="description"
-//             value={formData.description}
-//             onChange={handleInputChange}
-//             required
-//           />
-//         </Form.Group>
-//         <Button variant="primary" type="submit">
-//           Submit
-//         </Button>
-//       </Form>
-//     </Container>
-//     </div>
-//   );
-// };
-
-// export default Deposit;
-
-
-
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Form, Button, Container } from 'react-bootstrap';
 import './depositform.css'; // Import the custom CSS file
 
@@ -167,43 +8,33 @@ const Deposit = () => {
     date: '',
     member: '',
     accountNumber: '',
-    amount: '',
-    status: 'Completed',
-    description: '',
+    transactionAmount: '',
+    debitOrCredit: 'Credit',
+    status: '',
+    description: ''
   });
 
   const [members, setMembers] = useState([]);
   const [accounts, setAccounts] = useState([]);
 
-  useEffect(() => {
-    // Fetch members from API
-    fetchMembers();
-
-    // Fetch accounts from API
-    fetchAccounts();
-  }, []);
-
-  const fetchMembers = async () => {
+  const fetchData = async () => {
     try {
-      // Replace 'your-members-api-endpoint' with the actual API endpoint for members
-      const response = await fetch('your-members-api-endpoint');
-      const data = await response.json();
-      setMembers(data); // Assuming data is an array of members
+      const memberResponse = await axios.get('http://localhost:3001/readmemberids');
+      setMembers(memberResponse.data.data);
+      // console.log('Member IDs Status:', memberResponse);
+
+      const accountResponse = await axios.get('http://localhost:3001/readaccountnumbers');
+      setAccounts(accountResponse.data);
+      // console.log('Account Numbers Status:', accountResponse);
     } catch (error) {
-      console.error('Error fetching members:', error);
+      // console.error('Error fetching data:', error);
     }
   };
 
-  const fetchAccounts = async () => {
-    try {
-      // Replace 'your-accounts-api-endpoint' with the actual API endpoint for accounts
-      const response = await fetch('your-accounts-api-endpoint');
-      const data = await response.json();
-      setAccounts(data); // Assuming data is an array of accounts
-    } catch (error) {
-      console.error('Error fetching accounts:', error);
-    }
-  };
+  useEffect(  () => {
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only once on component mount
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -213,10 +44,36 @@ const Deposit = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add logic to send form data to your API
-    console.log(formData);
+    
+    try {
+      // Send form data to your API endpoint to create a transaction
+      const response = await fetch('http://localhost:3001/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      // console.log('Transaction created:', data); // Log the response from the server
+      
+      // Reset form fields after successful submission if needed
+      setFormData({
+        date: '',
+        member: '',
+        accountNumber: '',
+        transactionAmount: '',
+        debitOrCredit: 'Credit',
+        status: '',
+        description: ''
+      });
+      fetchData();
+    } catch (error) {
+      // console.error('Error creating transaction:', error);
+    }
   };
 
   return (
@@ -247,36 +104,36 @@ const Deposit = () => {
             <option value="">Select Member</option>
             {members.map((member) => (
               <option key={member.id} value={member.id}>
-                {member.name}
+                {member.id}
               </option>
             ))}
           </Form.Control>
         </Form.Group>
         <Form.Group controlId="accountNumber">
-          <Form.Label className="custom-form-label">Account Number *</Form.Label>
-          <Form.Control
-          className="custom-form-control"
-            as="select"
-            name="accountNumber"
-            value={formData.accountNumber}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="">Select Account</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.accountNumber}>
-                {account.accountNumber}
-              </option>
-            ))}
-          </Form.Control>
-        </Form.Group>
-        <Form.Group controlId="amount">
+            <Form.Label className="custom-form-label">Account Number *</Form.Label>
+            <Form.Control
+              className="custom-form-control"
+              as="select"
+              name="accountNumber"
+              value={formData.accountNumber}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Account</option>
+              {accounts.map((accountNumber) => (
+                <option key={accountNumber} value={accountNumber}>
+                  {accountNumber}
+                </option>
+              ))}
+            </Form.Control>
+          </Form.Group>
+        <Form.Group controlId="transactionAmount">
           <Form.Label className="custom-form-label">Amount *</Form.Label>
           <Form.Control
           className="custom-form-control"
             type="number"
-            name="amount"
-            value={formData.amount}
+            name="transactionAmount"
+            value={formData.transactionAmount}
             onChange={handleInputChange}
             required
           />
@@ -291,6 +148,7 @@ const Deposit = () => {
             onChange={handleInputChange}
             required
           >
+            <option value="">Please Select an Option</option>
             <option value="Completed">Completed</option>
             <option value="Pending">Pending</option>
             <option value="Cancelled">Cancelled</option>
