@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
-import Reports from '../Reports';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
+import Reports from "../Reports";
+import axios from "axios";
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+// console.log("Api URL:", API_BASE_URL);
 
 export default function Transaction() {
   const [transactions, setTransactions] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [formData, setFormData] = useState({
-    startDate: '',
-    endDate: '',
-    transactionType: '',
-    transactionStatus: '',
-    accountNumber: '',
+    startDate: "",
+    endDate: "",
+    transactionType: "",
+    transactionStatus: "",
+    accountNumber: "",
   });
+
+  const fetchData = async () => {
+    const accountResponse = await axios.get(
+      `${API_BASE_URL}/readaccountnumbers`
+    );
+    setAccounts(accountResponse.data);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -19,12 +33,14 @@ export default function Transaction() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
-      const response = await axios.get('http://localhost:3001/transactionreport', { params: formData });
+      const response = await axios.get(`${API_BASE_URL}/transactionreport`, {
+        params: formData,
+      });
       setTransactions(response.data);
     } catch (error) {
-      console.error('Error fetching transaction data:', error);
+      // console.error("Error fetching transaction data:", error);
       // Handle error (display an error message, etc.)
     }
   };
@@ -32,12 +48,12 @@ export default function Transaction() {
   return (
     <div>
       <Reports />
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: "20px" }}>
         <Container>
           <h2 className="mt-4">Transaction</h2>
           <Row className="mt-4">
             <Col>
-            <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSubmit}>
                 <Row>
                   {/* Start Date */}
                   <Col md={3} className="mb-2">
@@ -71,7 +87,8 @@ export default function Transaction() {
                         as="select"
                         value={formData.transactionType}
                         onChange={handleChange}
-                      ><option>Debit</option>
+                      >
+                        <option>Debit</option>
                         <option>Credit</option>
                       </Form.Control>
                     </Form.Group>
@@ -85,8 +102,10 @@ export default function Transaction() {
                         as="select"
                         value={formData.transactionStatus}
                         onChange={handleChange}
-                      > <option value='Pending'>Pending</option>
-                        <option value='Completed'>Completed</option>
+                      >
+                        {" "}
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
                         <option>All</option>
                       </Form.Control>
                     </Form.Group>
@@ -97,11 +116,17 @@ export default function Transaction() {
                     <Form.Group controlId="accountNumber">
                       <Form.Label>Account Number</Form.Label>
                       <Form.Control
-                        type="text"
-                        placeholder="Enter Acc No."
+                        as="select"
                         value={formData.accountNumber}
                         onChange={handleChange}
-                      />
+                      >
+                        <option value="">Choose</option>
+                        {accounts.map((accountNumber) => (
+                          <option key={accountNumber} value={accountNumber}>
+                            {accountNumber}
+                          </option>
+                        ))}
+                      </Form.Control>
                     </Form.Group>
                   </Col>
                 </Row>
@@ -129,16 +154,21 @@ export default function Transaction() {
           <hr className="my-4" />
 
           {/* Transaction Table */}
-          <Table striped bordered hover className="mt-2 rounded-lg overflow-hidden">
+          <Table
+            striped
+            bordered
+            hover
+            className="mt-2 rounded-lg overflow-hidden"
+          >
             <thead>
-            <th>Date</th>
-            <th>Member</th>
-            <th>AC Number</th>
-            <th>Amount</th>
-            <th>DR/CR</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Details</th>
+              <th>Date</th>
+              <th>Member</th>
+              <th>AC Number</th>
+              <th>Amount</th>
+              <th>DR/CR</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Details</th>
             </thead>
             <tbody>
               {transactions.map((transaction, index) => (
@@ -147,8 +177,10 @@ export default function Transaction() {
                   <td>{transaction.member}</td>
                   <td>{transaction.accountNumber}</td>
                   <td>${transaction.transactionAmount.toFixed(2)}</td>
-                  <td>{transaction.debitOrCredit === 'Debit' ? 'DR' : 'CR'}</td>
-                  <td>{transaction.debitOrCredit === 'Debit' ? 'Debit' : 'Credit'}</td>
+                  <td>{transaction.debitOrCredit === "Debit" ? "DR" : "CR"}</td>
+                  <td>
+                    {transaction.debitOrCredit === "Debit" ? "Debit" : "Credit"}
+                  </td>
                   <td>{transaction.status}</td>
                   <td>View Details</td>
                 </tr>

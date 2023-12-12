@@ -1,19 +1,67 @@
-import React, { useState,useEffect } from 'react';
-import axios from 'axios';
-import { Modal, Button, Form, Table, Alert, InputGroup, FormControl } from 'react-bootstrap';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Modal,
+  Button,
+  Form,
+  Table,
+  Alert,
+  InputGroup,
+  FormControl,
+} from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
-
 
 const Branches = () => {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [formData, setFormData] = useState({ branchName: '', contactemail: '', contactphone: '', branchaddress: '' });
+  const [formData, setFormData] = useState({
+    branchName: "",
+    name: "",
+    email: "",
+    password: "",
+    contactphone: "",
+    branchaddress: "",
+    userType: "manager",
+  });
   const [membersData, setMembersData] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
-  const [alertVariant, setAlertVariant] = useState('success'); // or 'danger' for an error alert
-  const [searchTerm, setSearchTerm] = useState('');
+  const [alertVariant, setAlertVariant] = useState("success"); // or 'danger' for an error alert
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedMemberIndex, setSelectedMemberIndex] = useState(null);
   const [filteredMembers, setFilteredMembers] = useState([]); // State to hold filtered members
+  const [presetemail, setEmail] = useState("");
+  const [presetpassword, setPassword] = useState("");
+
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
+  // console.log("Api URL:", API_BASE_URL);
+
+  // useEffect(async () => {
+  //   const token = localStorage.getItem("token");
+  //   if (token) {
+  //     (response = await axios.post(
+  //       "${API_BASE_URL}/getuseremailpassword"
+  //     )),
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           token,
+  //         }),
+  //       }
+  //         .then((response) => response.json())
+  //         .then((data) => {
+  //           console.log("Username:", data.username);
+  //           setEmail(data.email);
+  //           setPassword(data.password);
+  //         })
+  //         .catch((error) => {
+  //           console.error("Error:", error);
+  //           // Handle errors that occurred during the request
+  //         });
+  //   }
+  // }, []);
 
   const handleOpenModal = () => {
     setShowModal(true);
@@ -27,22 +75,22 @@ const Branches = () => {
 
   const handleOpenEditModal = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:3001/getbranch/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/getbranch/${id}`);
       const selectedMemberData = response.data; // Assuming response.data contains the member data
       // console.log(selectedMemberData);
       // Set the form data to the retrieved member's data
       // Set the form data to the retrieved member's data
       setFormData({
         ...selectedMemberData,
-        branchId: selectedMemberData._id // Assigning the ID to the correct field in the form
-      });      
+        branchId: selectedMemberData._id, // Assigning the ID to the correct field in the form
+      });
       setShowEditModal(true); // Open the edit modal
     } catch (error) {
-      console.error('Error fetching member data:', error);
+      // console.error("Error fetching member data:", error);
       // Handle error or display an error message to the user
     }
   };
-  
+
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setSelectedMemberIndex(null);
@@ -58,81 +106,82 @@ const Branches = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Check if it's an update or add operation
-    if (selectedMemberIndex !== null) {
-      // Update existing member
-      const updatedMembers = [...membersData];
-      updatedMembers[selectedMemberIndex] = formData;
-      setMembersData(updatedMembers);
-
-      // Show success alert for update
-      setAlertVariant('success');
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/createbranch`,
+        formData
+      );
+      fetchData();
+    } catch (error) {
       setShowAlert(true);
-    } else {
-      // Add new member
-      setMembersData((prevData) => [...prevData, formData]);
-      // Axios Create request here for posting data (Posting Correctly)
-      // console.log(formData);
-      try {      
-        const response =  await axios.post('http://localhost:3001/createbranch',formData);
-        // console.log('Data Successfully entered in Backend Server',formData);
-        // alert('success!');
-        fetchData();
-      } catch (error) {
-        console.log('Some Error in submitting the form data to backend');
-        // alert('failed');
-        setShowAlert(true);
-      }
     }
+    // Handle success of user creation
+    // console.log("Manager User Created:", responseUser.data);
+    setFormData({
+      branchName: "",
+      name: "",
+      email: "",
+      password: "",
+      contactphone: "",
+      branchaddress: "",
+      userType: "manager",
+    });
 
-    // Reset form data
-    setFormData({ branchName: '', email: '', phone: '', address: '' });
-
-    // Close modal after a delay (you can adjust the delay as needed)
-    setTimeout(() => {
-      handleCloseModal();
-    }, 500);
+    handleCloseModal();
   };
 
-  const handleUpdate = async (e,id) => {
-    e.preventDefault()
-    console.log(id);
+  const handleUpdate = async (e, id) => {
+    e.preventDefault();
+    // console.log(id);
     try {
       // Update member
       // console.log(formData);
-      const response = await axios.put(`http://localhost:3001/updatebranch/${formData._id}`, formData);
+      const response = await axios.put(
+        `${API_BASE_URL}/updatebranch/${formData._id}`,
+        formData
+      );
       // console.log(response.data);
       // Close the edit modal
       handleCloseEditModal();
+
+      // Reset form data
+      setFormData({
+        branchName: "",
+        name: "",
+        email: "",
+        password: "",
+        contactphone: "",
+        branchaddress: "",
+        userType: "manager",
+      });
       fetchData();
     } catch (error) {
-      console.error('Error updating data:', error);
+      // console.error("Error updating data:", error);
       // Show failure alert for update
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      const response = await axios.post(`http://localhost:3001/deletebranch/${id}`);
+      const response = await axios.post(`${API_BASE_URL}/deletebranch/${id}`);
       // console.log(response.data);
       // Show success alert for delete
       fetchData();
     } catch (error) {
-      console.error('Error in deleting data:', error);
-  
+      // console.error("Error in deleting data:", error);
+
       // Show error alert for delete
-      alert('failed');
+      alert("failed");
     }
   };
-  
+
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/readbranch');
+      const response = await axios.get(`${API_BASE_URL}/readbranch`);
       const { data } = response.data; // Extract 'data' array from the response
 
       // Filter the 'data' array based on searchTerm
@@ -143,7 +192,7 @@ const Branches = () => {
       // Update filteredMembers state with the filtered data
       setFilteredMembers(filteredData);
     } catch (error) {
-      console.error('Error while fetching data:', error);
+      // console.error("Error while fetching data:", error);
       // Handle the error or show an error message to the user
     }
   };
@@ -153,8 +202,7 @@ const Branches = () => {
   }, [searchTerm]);
 
   return (
-    <div className='body-div'>
-      
+    <div className="body-div">
       {/* <Button onClick={handleOpenModal}>Add New</Button>
         <FormControl
         className='custom-search-bar'
@@ -165,12 +213,18 @@ const Branches = () => {
           onChange={handleSearch}
         /> */}
 
-    <div className="d-flex mb-2">
-        <Button className="mr-2" onClick={() => { setFormData({}); handleOpenModal(); }}>
-          Add Loan
+      <div className="d-flex mb-2">
+        <Button
+          className="mr-2"
+          onClick={() => {
+            setFormData({});
+            handleOpenModal();
+          }}
+        >
+          Add Branch
         </Button>
         <FormControl
-          className='custom-search-bar'
+          className="custom-search-bar"
           type="text"
           placeholder="Search..."
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -179,7 +233,9 @@ const Branches = () => {
 
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
-          <Modal.Title>{selectedMemberIndex !== null ? 'Edit' : 'Add'} New</Modal.Title>
+          <Modal.Title>
+            {selectedMemberIndex !== null ? "Edit" : "Add"} New
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
@@ -193,13 +249,33 @@ const Branches = () => {
                 onChange={handleInputChange}
               />
             </Form.Group>
+            <Form.Group controlId="formmanagerName">
+              <Form.Label>Manager Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Manager Name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
             <Form.Group controlId="formEmail">
               <Form.Label>Email </Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Enter email"
-                name="contactemail"
-                value={formData.contactemail}
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formpassword">
+              <Form.Label>Password </Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Enter Password"
+                name="password"
+                value={formData.password}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -224,7 +300,7 @@ const Branches = () => {
               />
             </Form.Group>
             <Button variant="primary" type="submit">
-              {selectedMemberIndex !== null ? 'Edit' : 'Add'}
+              {selectedMemberIndex !== null ? "Edit" : "Add"}
             </Button>
           </Form>
         </Modal.Body>
@@ -237,18 +313,18 @@ const Branches = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleUpdate}>
-          <Form.Group controlId="formID">
-            <Form.Label>ID</Form.Label>
-            <Form.Control 
-              type="integer"
-              placeholder='Enter Id'
-              name='branchId'
-              value={formData.branchId}
-              onChange={handleInputChange}
-              readOnly
-            />
-          </Form.Group>
-          <Form.Group controlId="formName">
+            <Form.Group controlId="formID">
+              <Form.Label>ID</Form.Label>
+              <Form.Control
+                type="integer"
+                placeholder="Enter Id"
+                name="branchId"
+                value={formData.branchId}
+                onChange={handleInputChange}
+                readOnly
+              />
+            </Form.Group>
+            <Form.Group controlId="formName">
               <Form.Label>Name</Form.Label>
               <Form.Control
                 type="text"
@@ -258,13 +334,33 @@ const Branches = () => {
                 onChange={handleInputChange}
               />
             </Form.Group>
+            <Form.Group controlId="formmanagerName">
+              <Form.Label>Manager Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Manager Name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
             <Form.Group controlId="formEmail">
               <Form.Label>Email </Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Enter email"
-                name="contactemail"
-                value={formData.contactemail}
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group controlId="formpassword">
+              <Form.Label>Password </Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Enter Password"
+                name="password"
+                value={formData.password}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -288,20 +384,35 @@ const Branches = () => {
                 onChange={handleInputChange}
               />
             </Form.Group>
-            <Button variant="primary" type="submit">Update</Button>
+            <Button variant="primary" type="submit">
+              Update
+            </Button>
           </Form>
         </Modal.Body>
       </Modal>
 
-      <Alert show={showAlert} variant={alertVariant} onClose={() => setShowAlert(false)} dismissible>
-        {alertVariant === 'success' ? 'Success! Operation completed.' : 'Error! Something went wrong.'}
+      <Alert
+        show={showAlert}
+        variant={alertVariant}
+        onClose={() => setShowAlert(false)}
+        dismissible
+      >
+        {alertVariant === "success"
+          ? "Success! Operation completed."
+          : "Error! Something went wrong."}
       </Alert>
 
-      <Table responsive striped bordered hover className="mt-4 rounded-lg overflow-hidden">
+      <Table
+        responsive
+        striped
+        bordered
+        hover
+        className="mt-4 rounded-lg overflow-hidden"
+      >
         <thead>
           <tr>
-            <th>Unique Branch ID</th>
             <th>Name</th>
+            <th>Manager Name</th>
             <th>Email</th>
             <th>Phone</th>
             <th>Address</th>
@@ -311,17 +422,23 @@ const Branches = () => {
         <tbody>
           {filteredMembers.map((member) => (
             <tr>
-              <td>{member._id}</td>
               <td>{member.branchName}</td>
-              <td>{member.contactemail}</td>
+              <td>{member.name}</td>
+              <td>{member.email}</td>
               <td>{member.contactphone}</td>
               <td>{member.branchaddress}</td>
               <td>
-                <Button variant="warning" onClick={() => handleOpenEditModal(member._id)}>
-                  <FaEdit/>
-                </Button>{' '}
-                <Button variant="danger" onClick={() => handleDelete(member._id)}>
-                  <FaTrash/>
+                <Button
+                  variant="warning"
+                  onClick={() => handleOpenEditModal(member._id)}
+                >
+                  <FaEdit />
+                </Button>{" "}
+                <Button
+                  variant="danger"
+                  onClick={() => handleDelete(member._id)}
+                >
+                  <FaTrash />
                 </Button>
               </td>
             </tr>

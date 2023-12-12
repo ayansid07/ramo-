@@ -1,4 +1,4 @@
-import React,{useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsCurrencyDollar } from "react-icons/bs";
 import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosMore } from "react-icons/io";
@@ -20,6 +20,16 @@ import product9 from "../data/product9.jpg";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// const path = require('path');
+// const dotenv = require('dotenv');
+
+// const envPath = path.resolve(__dirname, '../.env');
+
+// dotenv.config({ path: envPath });
+
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+// console.log("Api URL:", API_BASE_URL);
+
 const DropDown = ({ currentMode }) => (
   <div className="w-28 border-1 border-color px-2 py-1 rounded-md">
     <DropDownListComponent
@@ -37,31 +47,60 @@ const DropDown = ({ currentMode }) => (
 const Ecommerce = () => {
   const { currentColor, currentMode } = useStateContext();
   const [totalMembers, setTotalMembers] = useState();
-  const [depositRequests, setDepositRequests] = useState();
-  const [withdrawRequests, setWithdrawRequests] = useState();
+  const [TotalLoanAmount, setTotalLoanAmount] = useState();
+  const [totalCurrentBalance, settotalCurrentBalance] = useState();
   const [pendingLoans, setPendingLoans] = useState();
   const [transactions, setTransactions] = useState([]);
+
+  // Get the token from localStorage
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    // Split the token into its components (header, payload, signature)
+    const tokenParts = token.split(".");
+
+    // Decode the payload (which is the second part of the token)
+    const encodedPayload = tokenParts[1];
+
+    // Decode the Base64 encoded payload to get the actual data
+    const decodedPayload = atob(encodedPayload);
+
+    // Parse the JSON data to get the object representation of the payload
+    const payload = JSON.parse(decodedPayload);
+
+    // Log the token and its payload
+    // console.log("Token:", token);
+    // console.log("Payload:", payload);
+    // console.log("Role: ", payload.role);
+  } else {
+    // console.log("Token not found in localStorage");
+  }
 
   // Fetch data for total members, deposit requests, withdraw requests, and pending loans
   const fetchData = async () => {
     try {
-      const membersResponse = await axios.get('http://localhost:3001/countMembers');
+      const membersResponse = await axios.get(`${API_BASE_URL}/countMembers`);
       setTotalMembers(membersResponse.data.count);
 
-      const depositResponse = await axios.get('http://localhost:3001/depositRequestsPending');
-      setDepositRequests(depositResponse.data.count);
+      const totalLoanAmount = await axios.get(
+        `${API_BASE_URL}/totalLoanAmount`
+      );
+      setTotalLoanAmount(totalLoanAmount.data.totalLoanAmount);
 
-      const withdrawResponse = await axios.get('http://localhost:3001/withdrawRequestsPending');
-      setWithdrawRequests(withdrawResponse.data.count);
+      const totalCurrentBalance = await axios.get(
+        `${API_BASE_URL}/totalCurrentBalance`
+      );
+      settotalCurrentBalance(totalCurrentBalance.data.totalCurrentBalance);
 
-      const loansResponse = await axios.get('http://localhost:3001/pendingLoans');
+      const loansResponse = await axios.get(`${API_BASE_URL}/pendingLoans`);
       setPendingLoans(loansResponse.data.data.length);
 
-      const transactionsResponse = await axios.get('http://localhost:3001/transactions');
+      const transactionsResponse = await axios.get(
+        `${API_BASE_URL}/transactions`
+      );
       setTransactions(transactionsResponse.data.data);
-
     } catch (error) {
-      console.error('Error fetching data:', error);
+      // console.error("Error fetching data:", error);
     }
   };
 
@@ -69,6 +108,8 @@ const Ecommerce = () => {
     // Fetch data on component mount
     fetchData();
   }, []);
+
+  const navigate = useNavigate();
 
   return (
     <div className="mt-18">
@@ -80,11 +121,14 @@ const Ecommerce = () => {
               <p className="text-2xl">{totalMembers}</p>
             </div>
           </div>
-          <div className="mt-6">
-            <button onClick={() => navigate("/members")} className="bg-cyan-500
+          <div className="mt-2 ml-4">
+            <button
+              onClick={() => navigate("/members")}
+              className="bg-cyan-500
              hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-outline-blue active:bg-gray-500"
-            >View</button>
-           
+            >
+              View
+            </button>
           </div>
         </div>
         {/* 1st card end */}
@@ -93,14 +137,18 @@ const Ecommerce = () => {
         <div class="relative bg-white dark:text-gray-200 dark:bg-secondary-dark-bg h-44 rounded-xl w-full lg:w-44 p-8 pt-9 m-3 bg-hero-pattern bg-no-repeat bg-cover bg-center shadow-lg transform transition duration-300 hover:translate-y-[-8px]">
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-bold text-gray-400">Deposit Request</p>
-              <p className="text-2xl">{depositRequests}</p>
+              <p className="font-bold text-gray-400">Total Loan Amount</p>
+              <p className="text-2xl">{TotalLoanAmount}</p>
             </div>
           </div>
-          <div className="mt-6">
-            <button onClick={() => navigate("/deposit")} className="bg-cyan-500
+          <div className="mt-2 ml-4">
+            <button
+              onClick={() => navigate("/deposit")}
+              className="bg-cyan-500
              hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-outline-blue active:bg-gray-500"
-            >View</button>
+            >
+              View
+            </button>
           </div>
         </div>
         {/* 2nd card end */}
@@ -109,15 +157,18 @@ const Ecommerce = () => {
         <div class="relative bg-white dark:text-gray-200 dark:bg-secondary-dark-bg h-44 rounded-xl w-full lg:w-44 p-8 pt-9 m-3 bg-hero-pattern bg-no-repeat bg-cover bg-center shadow-lg transform transition duration-300 hover:translate-y-[-8px]">
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-bold text-gray-400">Withdraw Request</p>
-              <p className="text-2xl">{withdrawRequests}</p>
+              <p className="font-bold text-gray-400">Account Balance</p>
+              <p className="text-2xl">{totalCurrentBalance}</p>
             </div>
           </div>
-          <div className="mt-6">
-            <button onClick={() => navigate("/withdraw")} className="bg-cyan-500
+          <div className="mt-2 ml-4">
+            <button
+              onClick={() => navigate("/withdraw")}
+              className="bg-cyan-500
              hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-outline-blue active:bg-gray-500"
-            >View</button>
-            
+            >
+              View
+            </button>
           </div>
         </div>
         {/* 3rd card end */}
@@ -129,7 +180,7 @@ const Ecommerce = () => {
               <p className="text-2xl">{pendingLoans}</p>
             </div>
           </div>
-          <div className="mt-6">
+          <div className="mt-2 ml-4">
             <button
               onClick={() => navigate("/loans")}
               className="bg-cyan-500
@@ -167,6 +218,9 @@ const Ecommerce = () => {
       </div>
 
       <div className="mx-6 ">
+        <h1 className="text-3xl m-2 text-cyan-500 font-medium">
+          Recent Transaction
+        </h1>
         <table className="table text-center bg-info text-white rounded-lg overflow-hidden ">
           <thead>
             <tr class="table-secondary">
@@ -175,26 +229,24 @@ const Ecommerce = () => {
               <th>Account Number</th>
               <th>Amount</th>
               <th>Debit/Credit</th>
-              <th>Type</th>
               <th>Status</th>
               {/* <th>Action</th> */}
             </tr>
           </thead>
-          <tbody className="table-success">
-            {transactions.slice(0,10).map((transaction, index) => (
+          <tbody>
+            {transactions.slice(0, 10).map((transaction, index) => (
               <tr key={index}>
-                <td>{transaction.date}</td>
+                <td>{new Date(transaction.date).toLocaleString()}</td>
                 <td>{transaction.member}</td>
                 <td>{transaction.accountNumber}</td>
                 <td>{transaction.transactionAmount}</td>
                 <td>{transaction.debitOrCredit}</td>
-                <td>{transaction.type}</td>
                 <td>{transaction.status}</td>
                 {/* <td>Render action button or data</td> */}
               </tr>
             ))}
           </tbody>
-          </table>
+        </table>
       </div>
     </div>
   );
