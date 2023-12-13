@@ -219,12 +219,14 @@ const User = () => {
 
   return (
     <div className="body-div">
-     
-      <div className="h-30 grid grid-cols-7 gap-3 content-start">
-      <Button onClick={handleOpenModal}>Add User</Button>
-      <AgentForm />
+      <div className="h-30 grid grid-cols-1 md:grid-cols-7 gap-3 content-start items-center">
+        <div className="w-full md:w-auto flex justify-start">
+          <Button className="w-auto max-w-xs " onClick={handleOpenModal}>
+            Add User
+          </Button>
+        </div>
+        <AgentForm />
       </div>
-      
 
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
@@ -396,7 +398,13 @@ const User = () => {
         </Modal.Body>
       </Modal>
 
-      <Table striped bordered hover className="mt-4 rounded-lg overflow-hidden">
+      <Table
+        responsive
+        striped
+        bordered
+        hover
+        className="mt-4 rounded-lg overflow-hidden"
+      >
         <thead>
           <tr>
             <th>Image</th>
@@ -412,12 +420,7 @@ const User = () => {
             <tr key={index}>
               <td>
                 {user.image ? (
-                  <img
-                    src= {user.image}
-                    alt="Profile"
-                    width="40"
-                    height="40"
-                  />
+                  <img src={user.image} alt="Profile" width="40" height="40" />
                 ) : (
                   "No Image"
                 )}

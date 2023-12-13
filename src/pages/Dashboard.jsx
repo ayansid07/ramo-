@@ -3,7 +3,7 @@ import { BsCurrencyDollar } from "react-icons/bs";
 import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosMore } from "react-icons/io";
 import { DropDownListComponent } from "@syncfusion/ej2-react-dropdowns";
-
+import { Table } from "react-bootstrap";
 // import Button from 'react-bootstrap/Button';
 import { Stacked, Pie, Button, LineChart, SparkLine } from "../components";
 import {
@@ -221,9 +221,14 @@ const Ecommerce = () => {
         <h1 className="text-3xl m-2 text-cyan-500 font-medium">
           Recent Transaction
         </h1>
-        <table className="table text-center bg-info text-white rounded-lg overflow-hidden ">
+        <Table
+          bordered
+          hover
+          responsive
+          className="text-center text-white rounded-lg overflow-hidden"
+        >
           <thead>
-            <tr class="table-secondary">
+            <tr className="table-secondary">
               <th>Date</th>
               <th>Member</th>
               <th>Account Number</th>
@@ -246,7 +251,7 @@ const Ecommerce = () => {
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       </div>
     </div>
   );

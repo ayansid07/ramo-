@@ -304,10 +304,10 @@ export const filterLinksByRole = (userRole) => {
               name: "Loans",
               icon: <GiReceiveMoney />,
             },
-            // {
-            //   name: "Repayments",
-            //   icon: <GiPayMoney />,
-            // },
+            {
+              name: "Repayments",
+              icon: <GiPayMoney />,
+            },
             {
               name: "Accounts",
               icon: <MdAccountBalance />,

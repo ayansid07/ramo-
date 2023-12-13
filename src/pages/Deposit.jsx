@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Form, Button, Container, Alert } from "react-bootstrap";
+import { Form, Button, Container, Alert, Table } from "react-bootstrap";
 import "./depositform.css"; // Import the custom CSS file
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 // console.log("Api URL:", API_BASE_URL);
@@ -193,35 +193,36 @@ const Deposit = () => {
         <h1 className="text-3xl m-2 text-cyan-500 font-medium ">
           Recent Deposits
         </h1>
-        <table className="table text-center text-white rounded-lg overflow-hidden ">
-          <thead>
-            <tr class="table-secondry">
-              <th>Date</th>
-              <th>Member</th>
-              <th>Account Number</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Type</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions
-              .filter((transaction) => transaction.debitOrCredit === "Credit") // Filter transactions where debitOrCredit is 'credit'
-              .slice(0, 10) // Take the first 10 transactions after filtering
-              .map((transaction, index) => (
-                <tr key={index}>
-                  <td>{new Date(transaction.date).toLocaleString()}</td>
-                  <td>{transaction.member}</td>
-                  <td>{transaction.accountNumber}</td>
-                  <td>{transaction.transactionAmount}</td>
-                  <td>{transaction.status}</td>
-                  <td>{transaction.debitOrCredit}</td>
-                  <td>{transaction.description}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+        <Table className="text-center text-white rounded-lg overflow-hidden" bordered hover responsive>
+    <thead>
+      <tr className="table-secondary">
+        <th>Date</th>
+        <th>Member</th>
+        <th>Account Number</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {transactions
+        .filter((transaction) => transaction.debitOrCredit === "Credit")
+        .slice(0, 10)
+        .map((transaction, index) => (
+          <tr key={index}>
+            <td>{new Date(transaction.date).toLocaleString()}</td>
+            <td>{transaction.member}</td>
+            <td>{transaction.accountNumber}</td>
+            <td>{transaction.transactionAmount}</td>
+            <td>{transaction.status}</td>
+            <td>{transaction.debitOrCredit}</td>
+            <td>{transaction.description}</td>
+          </tr>
+        ))}
+    </tbody>
+  </Table>
+
       </div>
     </div>
   );

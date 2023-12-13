@@ -10,8 +10,13 @@ import {
   Col,
 } from "react-bootstrap";
 import axios from "axios";
-// import { FaEdit, FaTrash } from "react-icons/fa";
 import { Dropdown } from "react-bootstrap";
+import AccountOverview from "./view/AccountOverview";
+import Details from "./view/Details";
+import Loans from './view/Loans'
+import Transactions from "./view/Transactions";
+
+
 
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -283,7 +288,7 @@ const Members = () => {
       const formDataWithImages = new FormData();
       formDataWithImages.append("images", formData.photo);
       formDataWithImages.append("images", formData.idProof);
-      console.log(formDataWithImages);
+    
 
       const responseUpload = await axios.post(
         `${API_BASE_URL}/uploadmultiple`,
@@ -361,17 +366,34 @@ const Members = () => {
     }
   };
   const [showViewModal, setShowViewModal] = useState(false);
-  const [viewMemberData, setViewMemberData] = useState(null);
+  const [viewMemberData, setViewMemberData] = useState({_id:'6578363b29cb0bb6b63e57c0'});
+
 
   const handleOpenViewModal = (id) => {
     const selectedMember = membersData.find((member) => member._id === id);
     setViewMemberData(selectedMember);
     setShowViewModal(true);
+   
   };
 
   const handleCloseViewModal = () => {
     setShowViewModal(false);
-    setViewMemberData(null);
+    setViewMemberData(true);
+  };
+
+
+
+
+
+  const [walletId, setWalletId] = useState('');
+  const [numberOfShares, setNumberOfShares] = useState(0);
+  const [amount, setAmount] = useState(0);
+
+  // Handle changes in the Number of Shares
+  const handleSharesChange = (e) => {
+    const shares = e.target.value;
+    setNumberOfShares(shares);
+    setAmount(shares * 160); // Assuming each share costs 160
   };
 
   return (
@@ -600,6 +622,48 @@ const Members = () => {
               </Col>
             </Row>
 
+
+
+        <Row className="mb-3">
+        <Col md={4}>
+          <Form.Group controlId="formWalletId">
+            <Form.Label>Wallet ID</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter Wallet ID"
+              name="walletId"
+              value={walletId}
+              onChange={(e) => setWalletId(e.target.value)}
+            />
+          </Form.Group>
+        </Col>
+
+        <Col md={4}>
+          <Form.Group controlId="formNumberOfShares">
+            <Form.Label>No. of Shares</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="Enter number of shares"
+              name="numberOfShares"
+              value={numberOfShares}
+              onChange={handleSharesChange}
+            />
+          </Form.Group>
+        </Col>
+
+        <Col md={4}>
+          <Form.Group controlId="formAmount">
+            <Form.Label>Amount</Form.Label>
+            <Form.Control
+              type="text"
+              name="amount"
+              value={amount}
+              readOnly // This field is read-only
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
             {/* HR Section */}
             <hr />
 
@@ -765,15 +829,17 @@ const Members = () => {
           </Form>
         </Modal.Body>
       </Modal>
-      <Modal show={showViewModal} onHide={handleCloseViewModal} centered>
+
+      <Modal show={showViewModal} onHide={handleCloseViewModal} size="lg" centered dialogClassName="w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2">
         <Modal.Header closeButton className="bg-cyan-800 text-white">
           <Modal.Title className="text-xl font-semibold">
             View Member Details
           </Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           <Tab.Container defaultActiveKey="details">
-            <Nav variant="tabs" className="mb-3">
+            <Nav variant="tabs" className="mb-6">
               <Nav.Item>
                 <Nav.Link eventKey="details">Member Details</Nav.Link>
               </Nav.Item>
@@ -791,22 +857,26 @@ const Members = () => {
 
             <Tab.Content>
               <Tab.Pane eventKey="details">
-                {/* Member details component or JSX */}
+                <Details   id={viewMemberData._id}/>
               </Tab.Pane>
               <Tab.Pane eventKey="overview">
-                {/* Account overview component or JSX */}
+                <AccountOverview id={viewMemberData._id}/>
               </Tab.Pane>
               <Tab.Pane eventKey="transactions">
-                {/* Transactions component or JSX */}
+                <Transactions id={viewMemberData._id}/>
               </Tab.Pane>
               <Tab.Pane eventKey="loans">
-                {/* Loans component or JSX */}
+                <Loans id={viewMemberData._id}/>
               </Tab.Pane>
               {/* Add more Tab.Pane components as needed */}
             </Tab.Content>
           </Tab.Container>
         </Modal.Body>
       </Modal>
+
+
+
+
 
       <Modal show={showAccountModal} onHide={handleCloseAccountModal}>
         <Modal.Header closeButton>
@@ -885,7 +955,12 @@ const Members = () => {
               <td>
                 {" "}
                 {member.photo ? (
-                  <img src={member.photo} alt="Profile" width="40" height="40" />
+                  <img
+                    src={member.photo}
+                    alt="Profile"
+                    width="40"
+                    height="40"
+                  />
                 ) : (
                   "No Image"
                 )}
@@ -898,7 +973,12 @@ const Members = () => {
               <td>
                 {" "}
                 {member.image ? (
-                  <img src={member.idProof} alt="Profile" width="40" height="40" />
+                  <img
+                    src={member.idProof}
+                    alt="Profile"
+                    width="40"
+                    height="40"
+                  />
                 ) : (
                   "No Image"
                 )}
