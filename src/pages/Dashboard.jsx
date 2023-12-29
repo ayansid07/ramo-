@@ -200,7 +200,7 @@ const Ecommerce = () => {
           </div>
 
           <div className="mt-10 flex gap-10 flex-wrap justify-center">
-            <div className=" border-r-1 border-color m-4 pr-10">
+            {/* <div className=" border-r-1 border-color m-4 pr-10">
               <div className="w-40">
                 <Pie
                   id="pie-chart"
@@ -209,7 +209,7 @@ const Ecommerce = () => {
                   height="260px"
                 />
               </div>
-            </div>
+            </div> */}
             <div>
               <Stacked currentMode={currentMode} width="320px" height="360px" />
             </div>

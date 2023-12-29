@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button, Table } from "react-bootstrap";
 import axios from "axios";
 import Reports from "../Reports";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-// console.log("Api URL:", API_BASE_URL);
+// // console.log("Api URL:", API_BASE_URL);
 
 export default function Loanreport() {
   const [memberNumbers, setmemberNumbers] = useState([]);
@@ -15,6 +17,20 @@ export default function Loanreport() {
     memberNo: "",
   });
 
+  const downloadPDF = () => {
+    const input = document.getElementById("table-to-download");
+
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save("loanreport.pdf");
+    });
+  };
+
   // Function to fetch data
   const fetchData = async () => {
     try {
@@ -22,7 +38,7 @@ export default function Loanreport() {
       const memberNumbers = membersResponse.data.data;
       setmemberNumbers(memberNumbers);
     } catch (error) {
-      // console.error('Error fetching data:', error);
+      // // console.error('Error fetching data:', error);
       // Handle error or display an error message
     }
   };
@@ -42,9 +58,9 @@ export default function Loanreport() {
     try {
       const response = await axios.post(`${API_BASE_URL}/loanreport`, formData);
       setLoanData(response.data);
-      // console.log(response);
+      // // console.log(response);
     } catch (error) {
-      // console.error("Error fetching loan data:", error);
+      // // console.error("Error fetching loan data:", error);
       // Handle error (display an error message, etc.)
     }
   };
@@ -120,6 +136,16 @@ export default function Loanreport() {
                 <Button variant="primary" type="submit">
                   Search
                 </Button>
+                <Col md={9}>
+                  <Button
+                    className="justify-start mt-2"
+                    variant="danger"
+                    type="button"
+                    onClick={downloadPDF}
+                  >
+                    Export to PDF
+                  </Button>
+                </Col>
               </Form>
             </Col>
           </Row>
@@ -134,6 +160,7 @@ export default function Loanreport() {
             bordered
             hover
             className="mt-2 rounded-lg overflow-hidden"
+            id="table-to-download" // Add an ID to the table
           >
             <thead>
               <tr>
@@ -155,7 +182,7 @@ export default function Loanreport() {
                   <td>{loan.memberNo}</td>
                   <td>{loan.releaseDate}</td>
                   <td>{loan.loanProduct}</td>
-                  <td>{loan.borrower}</td>
+                  <td>{loan.memberName}</td>
                   <td>{loan.appliedAmount}</td>
                   <td>{loan.dueAmount !== null ? loan.dueAmount : "N/A"}</td>
                   <td>{loan.status}</td>

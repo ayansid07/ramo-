@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Form, Button, Row, Col, Table } from "react-bootstrap";
 import Reports from "../Reports";
 import axios from "axios";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-// console.log("Api URL:", API_BASE_URL);
+// // console.log("Api URL:", API_BASE_URL);
 
 const AccountStatement = () => {
   const [transactions, setTransactions] = useState([]);
@@ -37,24 +39,29 @@ const AccountStatement = () => {
     }
   };
 
-  useEffect(() =>{
+  useEffect(() => {
     fetchData();
   }, []);
 
+  const downloadPDF = () => {
+    const input = document.getElementById("table-to-download");
+
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save("accountstatement.pdf");
+    });
+  };
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     fetchData();
   };
 
-  const handleExportToPDF = () => {
-    const blob = new Blob([<MyDocument data={data} />], {
-      type: "application/pdf",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "AccStatement.pdf";
-    link.click();
-  };
   return (
     <div>
       <Reports />
@@ -98,11 +105,16 @@ const AccountStatement = () => {
                   <Button variant="primary" type="submit" className="mt-8">
                     Search
                   </Button>
-                  <Col md={9} >
-              <Button className="justify-start mt-2"  variant="danger" type="button">
-                Export to PDF
-              </Button>
-            </Col>
+                  <Col md={9}>
+                    <Button
+                      className="justify-start mt-2"
+                      variant="danger"
+                      type="button"
+                      onClick={downloadPDF}
+                    >
+                      Export to PDF
+                    </Button>
+                  </Col>
                   {/* <Button className="justify-start ml-2" variant="danger" onClick={handleExportToPDF}>
                     Export to PDF
                   </Button> */}
@@ -115,7 +127,14 @@ const AccountStatement = () => {
         <hr />
         <br />
 
-        <Table  responsive striped bordered hover className="rounded-lg overflow-hidden">
+        <Table
+          responsive
+          striped
+          bordered
+          hover
+          className="rounded-lg overflow-hidden"
+          id="table-to-download" // Add an ID to the table
+        >
           <thead>
             <tr>
               <th>Date</th>
@@ -129,7 +148,9 @@ const AccountStatement = () => {
             {transactions.length > 0 ? (
               transactions.map((transaction, index) => (
                 <tr key={index}>
-                  <td>{new Date(transaction.date).toLocaleString()}</td>
+                  <td>
+                    {new Date(+new Date(transaction.Date)).toLocaleString()}
+                  </td>
                   <td>{transaction.Description}</td>
                   <td>{transaction.Debit}</td>
                   <td>{transaction.Credit}</td>

@@ -35,8 +35,10 @@ import ExpenseReport from "./pages/reports/Expense";
 import RevenueReport from "./pages/reports/Revenue";
 import AccountStatement from "./pages/reports/Accountstatement";
 import AgentDash from "./pages/AgentDash";
+import Switch from "./pages/Switch";
+
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-console.log("Api URL:", API_BASE_URL);
+// console.log("Api URL:", API_BASE_URL);
 
 const App = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -138,66 +140,7 @@ const AuthenticatedRoutes = ({ userRole }) => {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/branches" element={<Branches />} />
-                  <Route path="/members" element={<Members />} />
-                  <Route path="/accounts" element={<Accounts />} />
-                  <Route path="/repayments" element={<Repayments />} />
-                  <Route path="/loans" element={<Loans />} />
-                  <Route path="/deposit" element={<Deposit />} />
-                  <Route path="/withdraw" element={<Withdraw />} />
-                  <Route path="/transaction" element={<Transaction />} />
-                  <Route path="/expense" element={<Expense />} />
-                  <Route path="/user" element={<User />} />
-                  <Route path="/reports" element={<AccountStatement />} />
-                  <Route path="/accountstatement" element={<Accountstatement />} />
-                  <Route path="/accountbalance" element={<Accountbalance />} />
-                  <Route path="/loandue" element={<Loandue />} />
-                  <Route path="/loanreport" element={<Loanreport />} />
-                  <Route path="/loandue" element={<Loandue />} />
-                  <Route path="/Transactionreport" element={<TransactionReport />} />
-                  <Route path="/ExpenseReport" element={<ExpenseReport />} />
-                  <Route path="/RevenueReport" element={<RevenueReport />} />
-                </Routes>
-              </div>
-              <Footer />
-            </div>
-          </div>
-        </div>
-      );
-      break;
-      
-      case "manager":
-        routesToRender = (
-          <div className={currentMode === "Dark" ? "dark" : ""}>
-          <div className="flex relative dark:bg-main-dark-bg">
-            <div
-              className="fixed right-4 bottom-4"
-              style={{ zIndex: "1000" }}
-            ></div>
-            {activeMenu ? (
-              <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
-                <Sidebar />
-              </div>
-            ) : (
-              <div className="w-0 dark:bg-secondary-dark-bg">
-                <Sidebar />
-              </div>
-            )}
-            <div
-              className={
-                activeMenu
-                  ? "dark:bg-main-dark-bg  bg-main-bg min-h-screen md:ml-72 w-full  "
-                  : "bg-main-bg dark:bg-main-dark-bg  w-full min-h-screen flex-2 "
-              }
-            >
-              <div>
-                <Navbar />
-              </div>
-              <div>
-                <Routes>
-                  {/* pages  */}
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/branches" element={<Branches />} />
+                  <Route path="/Switch" element={<Switch />} />
                   <Route path="/members" element={<Members />} />
                   <Route path="/accounts" element={<Accounts />} />
                   <Route path="/repayments" element={<Repayments />} />
@@ -230,10 +173,10 @@ const AuthenticatedRoutes = ({ userRole }) => {
         </div>
       );
       break;
-      
-      case "agent":
-        routesToRender = (
-          <div className={currentMode === "Dark" ? "dark" : ""}>
+
+    case "manager":
+      routesToRender = (
+        <div className={currentMode === "Dark" ? "dark" : ""}>
           <div className="flex relative dark:bg-main-dark-bg">
             <div
               className="fixed right-4 bottom-4"
@@ -251,8 +194,8 @@ const AuthenticatedRoutes = ({ userRole }) => {
             <div
               className={
                 activeMenu
-                ? "dark:bg-main-dark-bg  bg-main-bg min-h-screen md:ml-72 w-full  "
-                : "bg-main-bg dark:bg-main-dark-bg  w-full min-h-screen flex-2 "
+                  ? "dark:bg-main-dark-bg  bg-main-bg min-h-screen md:ml-72 w-full  "
+                  : "bg-main-bg dark:bg-main-dark-bg  w-full min-h-screen flex-2 "
               }
             >
               <div>
@@ -261,12 +204,78 @@ const AuthenticatedRoutes = ({ userRole }) => {
               <div>
                 <Routes>
                   {/* pages  */}
-                
-                  <Route path="/" element={<AgentDash />} />
-                  <Route path="/dashboard" element={<AgentDash />} />
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/branches" element={<Branches />} />
+                  <Route path="/Switch" element={<Switch />} />
                   <Route path="/members" element={<Members />} />
                   <Route path="/accounts" element={<Accounts />} />
-                  {/* <Route path="/branches" element={<Branches />} /> */}
+                  <Route path="/repayments" element={<Repayments />} />
+                  <Route path="/loans" element={<Loans />} />
+                  <Route path="/deposit" element={<Deposit />} />
+                  <Route path="/withdraw" element={<Withdraw />} />
+                  <Route path="/transaction" element={<Transaction />} />
+                  <Route path="/expense" element={<Expense />} />
+                  <Route path="/user" element={<User />} />
+                  <Route path="/reports" element={<AccountStatement />} />
+                  <Route
+                    path="/accountstatement"
+                    element={<Accountstatement />}
+                  />
+                  <Route path="/accountbalance" element={<Accountbalance />} />
+                  <Route path="/loandue" element={<Loandue />} />
+                  <Route path="/loanreport" element={<Loanreport />} />
+                  <Route path="/loandue" element={<Loandue />} />
+                  <Route
+                    path="/Transactionreport"
+                    element={<TransactionReport />}
+                  />
+                  <Route path="/ExpenseReport" element={<ExpenseReport />} />
+                  <Route path="/RevenueReport" element={<RevenueReport />} />
+                </Routes>
+              </div>
+              <Footer />
+            </div>
+          </div>
+        </div>
+      );
+      break;
+
+    case "agent":
+      routesToRender = (
+        <div className={currentMode === "Dark" ? "dark" : ""}>
+          <div className="flex relative dark:bg-main-dark-bg">
+            <div
+              className="fixed right-4 bottom-4"
+              style={{ zIndex: "1000" }}
+            ></div>
+            {activeMenu ? (
+              <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
+                <Sidebar />
+              </div>
+            ) : (
+              <div className="w-0 dark:bg-secondary-dark-bg">
+                <Sidebar />
+              </div>
+            )}
+            <div
+              className={
+                activeMenu
+                  ? "dark:bg-main-dark-bg  bg-main-bg min-h-screen md:ml-72 w-full  "
+                  : "bg-main-bg dark:bg-main-dark-bg  w-full min-h-screen flex-2 "
+              }
+            >
+              <div>
+                <Navbar />
+              </div>
+              <div>
+                <Routes>
+                  {/* pages  */}
+                  <Route path="/" element={<AgentDash />} />
+                  <Route path="/dashboard" element={<AgentDash />} />
+                  <Route path="/branches" element={<Branches />} />
+                  <Route path="/members" element={<Members />} />
+                  <Route path="/accounts" element={<Accounts />} />
                   <Route path="/repayments" element={<Repayments />} />
                   <Route path="/loans" element={<Loans />} />
                   <Route path="/deposit" element={<Deposit />} />

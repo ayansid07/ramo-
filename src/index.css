@@ -28,10 +28,19 @@ body {
   color: black;
   
 }
+
+
+
+
 .body-div {
   max-width: 900px;
   margin: 0 auto;
 }
+
+
+
+
+
 
 .custom-search-bar {
   width: 350px; /* Adjust the width as needed */

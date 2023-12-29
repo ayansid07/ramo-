@@ -5,7 +5,7 @@ import axios from "axios";
 import { Form, Button, Container } from "react-bootstrap";
 import "./depositform.css";
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-// console.log("Api URL:", API_BASE_URL);
+// // console.log("Api URL:", API_BASE_URL);
 
 const Transaction = () => {
   const [formData, setFormData] = useState({
@@ -26,15 +26,15 @@ const Transaction = () => {
     try {
       const memberResponse = await axios.get(`${API_BASE_URL}/readmemberids`);
       setMembers(memberResponse.data.data);
-      // console.log('Member IDs Status:', memberResponse);
+      // // console.log('Member IDs Status:', memberResponse);
 
       const accountResponse = await axios.get(
         `${API_BASE_URL}/readaccountnumbers`
       );
       setAccounts(accountResponse.data);
-      // console.log('Account Numbers Status:', accountResponse);
+      // // console.log('Account Numbers Status:', accountResponse);
     } catch (error) {
-      // console.error('Error fetching data:', error);
+      // // console.error('Error fetching data:', error);
     }
   };
 
@@ -49,7 +49,7 @@ const Transaction = () => {
   //     const data = await response.json();
   //     setTransactionTypes(data); // Assuming data is an array of transaction types
   //   } catch (error) {
-  //     console.error('Error fetching transaction types:', error);
+  //     // console.error('Error fetching transaction types:', error);
   //   }
   // };
 
@@ -61,6 +61,44 @@ const Transaction = () => {
     }));
   };
 
+  const fetchDetails = async (inputValue, type) => {
+    try {
+      let response;
+      if (type === "member") {
+        response = await axios.get(
+          `${API_BASE_URL}/detailsByMemberId/${inputValue}`
+        );
+        const memberDetails = response.data;
+        const { accountNumber } = memberDetails;
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          accountNumber: accountNumber,
+          // Update other form fields as needed
+        }));
+      } else if (type === "account") {
+        response = await axios.get(
+          `${API_BASE_URL}/detailsByAccountNumber/${inputValue}`
+        );
+        const accountDetails = response.data;
+        const { member } = accountDetails;
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          member: member,
+          // Update other form fields as needed
+        }));
+      }
+      // Handle the retrieved details accordingly
+    } catch (error) {
+      // Handle error or display an error message
+      // // console.error("Error fetching details:", error);
+    }
+  };
+
+  const handleMemberOrAccountSelect = (value, type) => {
+    // Call fetchDetails function with the selected value and type
+    fetchDetails(value, type);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -69,7 +107,7 @@ const Transaction = () => {
         `${API_BASE_URL}/transactions`,
         formData
       );
-      // console.log(response);
+      // // console.log(response);
 
       // Reset form fields after successful submission if needed
       setFormData({
@@ -83,9 +121,9 @@ const Transaction = () => {
       });
       fetchData();
     } catch (error) {
-      // console.error('Error creating transaction:', error);
+      // // console.error('Error creating transaction:', error);
     }
-    // console.log(formData);
+    // // console.log(formData);
   };
 
   return (
@@ -110,8 +148,11 @@ const Transaction = () => {
               as="select"
               name="member"
               value={formData.member}
-              onChange={handleInputChange}
-              required
+              onChange={(e) => {
+                handleInputChange(e);
+                fetchDetails(e.target.value, "member");
+              }}
+            required
             >
               <option value="">Select Member</option>
               {members.map((member) => (
@@ -130,8 +171,11 @@ const Transaction = () => {
               as="select"
               name="accountNumber"
               value={formData.accountNumber}
-              onChange={handleInputChange}
-              required
+              onChange={(e) => {
+                handleInputChange(e);
+                fetchDetails(e.target.value, "account");
+              }}
+            required
             >
               <option value="">Select Account</option>
               {accounts.map((accountNumber) => (

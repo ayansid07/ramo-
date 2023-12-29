@@ -6,7 +6,7 @@ import DatePicker from "react-datepicker";
 import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-// console.log("Api URL:", API_BASE_URL);
+// // console.log("Api URL:", API_BASE_URL);
 
 const Repayments = () => {
   const [showModal, setShowModal] = useState(false);
@@ -54,7 +54,7 @@ const Repayments = () => {
     e.preventDefault();
     try {
       const response = await axios.post(`${API_BASE_URL}/repayments`, formData);
-      // console.log('Data Successfully entered in Backend Server', response.data.data);
+      // // console.log('Data Successfully entered in Backend Server', response.data.data);
       fetchData();
       handleCloseModal();
       setFormData({
@@ -68,7 +68,7 @@ const Repayments = () => {
         totalAmount: 0,
       });
     } catch (error) {
-      // console.error('Some Error in submitting the form data to backend:', error);
+      // // console.error('Some Error in submitting the form data to backend:', error);
       handleCloseModal();
     }
   };
@@ -77,6 +77,7 @@ const Repayments = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/repayments`);
       setRepaymentsData(response.data.data);
+      // console.log(response);
     } catch (error) {
       // Handle error or display an error message to the user
     }
@@ -84,15 +85,15 @@ const Repayments = () => {
       const response = await axios.get(`${API_BASE_URL}/approvedLoans`);
       const data = response.data.data;
       setApprovedLoanIds(data);
-      // console.log('Approved Loan Id',data);
+      // // console.log('Approved Loan Id',data);
     } catch (error) {
-      // console.error('Error fetching approved loan IDs:', error);
+      // // console.error('Error fetching approved loan IDs:', error);
     }
   };
 
   const checkRepaymentExists = async (loanId) => {
     try {
-      // console.log("loan Id:", loanId); // String Output
+      // // console.log("loan Id:", loanId); // String Output
       // Fetch the repayment details using the repaymentId
       // const responsea = await axios.get(`${API_BASE_URL}/repayments/${repaymentId}/loanId`);
       // const loanId = responsea.data.data.loanId;
@@ -102,7 +103,7 @@ const Repayments = () => {
       );
       return response.data.exists;
     } catch (error) {
-      // console.error("Error checking repayment:", error);
+      // // console.error("Error checking repayment:", error);
       return false;
     }
   };
@@ -139,17 +140,17 @@ const Repayments = () => {
                 : repayment
             )
           );
-          // console.log(
+          // // console.log(
           //   "Repayment data created for the current month:",
           //   createResponse.data.repaymentData
           // );
         } else {
-          // console.log("Failed to create repayment data for the current month.");
+          // // console.log("Failed to create repayment data for the current month.");
           // Handle failure to create repayment data
         }
       }
     } catch (error) {
-      // console.error("Error handling payment:", error);
+      // // console.error("Error handling payment:", error);
       // Handle errors or display a message to the user
     }
   };
@@ -302,6 +303,7 @@ const Repayments = () => {
             <th>Late Penalties</th>
             <th>Total Amount</th>
             <th>Payment Status</th>
+            <th>Month Status</th>
           </tr>
         </thead>
         <tbody>
@@ -327,6 +329,7 @@ const Repayments = () => {
                     : "Pay Now"}
                 </Button>
               </td>
+              <td>{repayment.monthstatus}</td>
             </tr>
           ))}
         </tbody>

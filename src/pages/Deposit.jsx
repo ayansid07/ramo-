@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Form, Button, Container, Alert, Table } from "react-bootstrap";
+import { Form, Button, Container, Alert,Table } from "react-bootstrap";
 import "./depositform.css"; // Import the custom CSS file
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 // console.log("Api URL:", API_BASE_URL);
@@ -52,6 +52,44 @@ const Deposit = () => {
       ...prevData,
       [name]: value,
     }));
+  };
+
+  const fetchDetails = async (inputValue, type) => {
+    try {
+      let response;
+      if (type === "member") {
+        response = await axios.get(
+          `${API_BASE_URL}/detailsByMemberId/${inputValue}`
+        );
+        const memberDetails = response.data;
+        const { accountNumber } = memberDetails;
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          accountNumber: accountNumber,
+          // Update other form fields as needed
+        }));
+      } else if (type === "account") {
+        response = await axios.get(
+          `${API_BASE_URL}/detailsByAccountNumber/${inputValue}`
+        );
+        const accountDetails = response.data;
+        const { member } = accountDetails;
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          member: member,
+          // Update other form fields as needed
+        }));
+      }
+      // Handle the retrieved details accordingly
+    } catch (error) {
+      // Handle error or display an error message
+      // console.error("Error fetching details:", error);
+    }
+  };
+
+  const handleMemberOrAccountSelect = (value, type) => {
+    // Call fetchDetails function with the selected value and type
+    fetchDetails(value, type);
   };
 
   const handleSubmit = async (e) => {
@@ -114,8 +152,11 @@ const Deposit = () => {
               as="select"
               name="member"
               value={formData.member}
-              onChange={handleInputChange}
-              required
+              onChange={(e) => {
+                handleInputChange(e);
+                fetchDetails(e.target.value, "member");
+              }}
+            required
             >
               <option value="">Select Member</option>
               {members.map((member) => (
@@ -134,8 +175,11 @@ const Deposit = () => {
               as="select"
               name="accountNumber"
               value={formData.accountNumber}
-              onChange={handleInputChange}
-              required
+              onChange={(e) => {
+                handleInputChange(e);
+                fetchDetails(e.target.value, "account");
+              }}
+            required
             >
               <option value="">Select Account</option>
               {accounts.map((accountNumber) => (
@@ -193,36 +237,40 @@ const Deposit = () => {
         <h1 className="text-3xl m-2 text-cyan-500 font-medium ">
           Recent Deposits
         </h1>
-        <Table className="text-center text-white rounded-lg overflow-hidden" bordered hover responsive>
-    <thead>
-      <tr className="table-secondary">
-        <th>Date</th>
-        <th>Member</th>
-        <th>Account Number</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      {transactions
-        .filter((transaction) => transaction.debitOrCredit === "Credit")
-        .slice(0, 10)
-        .map((transaction, index) => (
-          <tr key={index}>
-            <td>{new Date(transaction.date).toLocaleString()}</td>
-            <td>{transaction.member}</td>
-            <td>{transaction.accountNumber}</td>
-            <td>{transaction.transactionAmount}</td>
-            <td>{transaction.status}</td>
-            <td>{transaction.debitOrCredit}</td>
-            <td>{transaction.description}</td>
-          </tr>
-        ))}
-    </tbody>
-  </Table>
-
+        <Table
+          className="text-center text-white rounded-lg overflow-hidden"
+          bordered
+          hover
+          responsive
+        >
+          <thead>
+            <tr className="table-secondary">
+              <th>Date</th>
+              <th>Member</th>
+              <th>Account Number</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions
+              .filter((transaction) => transaction.debitOrCredit === "Credit")
+              .slice(0, 10)
+              .map((transaction, index) => (
+                <tr key={index}>
+                  <td>{new Date(transaction.date).toLocaleString()}</td>
+                  <td>{transaction.member}</td>
+                  <td>{transaction.accountNumber}</td>
+                  <td>{transaction.transactionAmount}</td>
+                  <td>{transaction.status}</td>
+                  <td>{transaction.debitOrCredit}</td>
+                  <td>{transaction.description}</td>
+                </tr>
+              ))}
+          </tbody>
+        </Table>
       </div>
     </div>
   );
