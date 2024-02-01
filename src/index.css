@@ -1,271 +1,59 @@
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap");
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: "Open Sans", sans-serif;
-  overflow-x: hidden;
-}
-
-html {
-  overflow-x: hidden;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* General Styles */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: "Open Sans", sans-serif;
-  overflow-x: hidden;
-  background-color: #f8f9fa;
+.btn {
+  background: #2c2c2c;
+  box-shadow: 0px 4.42184px 107.23px rgba(255, 86, 246, 0.51);
 }
 
-.btn-primary,.btn-secondry,.btn-danger, .btn-warning{
-  color: black;
-  
+.btn:hover {
+  background: #4d604f;
 }
 
-
-
-
-.body-div {
-  max-width: 900px;
-  margin: 0 auto;
+.gradient,
+.active {
+  background: linear-gradient(
+    92.23deg,
+    #406aff 21.43%,
+    #3bace2 50.63%,
+    #b936ee 100%,
+    #ff56f6 117.04%
+  );
 }
 
-
-
-
-
-
-.custom-search-bar {
-  width: 350px; /* Adjust the width as needed */
-}
-/* Form Container */
-.form-container {
-  background-color: #fff;
-  padding: 20px;
-  margin-top: 20px;
-  border-radius: 8px; /* Slightly rounded corners */
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+.active {
+  color: #fff;
+  padding: 1rem;
+  border-radius: 100%;
 }
 
-/* Table Styles */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th {
-  background-color: #f0f0f0; /* Light background color for header */
-  color: #000; /* Black text for header */
-  border-radius: 0; /* Remove border-radius for header */
-  padding: 15px; /* Increased padding for better touch */
-  text-align: left;
-}
-
-.table th:not(:first-child) {
-  margin-left: 10px; /* Add gap between table headers */
-}
-
-.table td {
-  border: 1px solid #ddd; /* Add a very thin grey border for each cell */
-  padding: 15px; /* Increased padding for better touch */
-  text-align: left;
-  border-radius: 0; /* Remove border-radius for cells */
-}
-
-.table td:not(:first-child) {
-  margin-left: 10px; /* Add gap between cells */
-}
-
-/* Dropdown Container */
-.dropdown-container {
-  display: flex;
-  align-items: center;
-}
-
-.dropdown-container .dropdown {
-  margin-left: auto;
-}
-
-/* Primary Button Styles */
-.btn-primary {
-  background-color: #33c2d8; /* Cyan color */
-  border-color: #00d9ff; /* Cyan color */
-  color: #ffffff; /* White text */
-  /* padding: 12px; Decreased padding for better touch */
-  cursor: pointer;
-  transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth transition */
-  
-}
-
-
-.btn-primary:hover {
-  background-color: #138496; /* Darker Cyan color on hover */
-  border-color: #138496; /* Darker Cyan color on hover */
-}
-
-.btn-secondry{
-  background-color: rgb(128, 128, 128);
-  color: white;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Input Placeholder Animation */
-.form-control:focus + .form-label,
-.date-picker:focus + .form-label {
-  top: 0;
-  font-size: 12px;
-  color: #17a2b8; /* Cyan color on focus */
-}
-
-/* Modern Input Animation */
-.form-control:focus + .form-label,
-.form-control:valid + .form-label {
-  top: 0;
-  font-size: 12px;
-  color: #17a2b8; /* Cyan color on focus or when the input has a value */
-}
-
-/* Media Query for Mobile */
-@media (max-width: 600px) {
-  .container {
-    width: 100%;
-    padding: 10px;
+@layer base {
+  body {
+    @apply font-secondary text-lg leading-8 text-white bg-gradient-to-br from-green-500   via-emerald-500 to-teal-500;
   }
-
-  .form-container {
-    padding: 15px;
+  .h2 {
+    @apply font-primary text-[32px] mb-6 tracking-[10%] uppercase;
   }
-
-  .form-control,
-  .date-picker {
-    padding: 12px;
+  .h3 {
+    @apply font-primary font-semibold text-[26px] mb-6 leading-[46px];
   }
-
-  .button-container button {
-    padding: 12px;
-    font-size: 14px; /* Adjusted font size for button */
+  .btn {
+    @apply rounded-xl font-primary text-white font-medium;
   }
-
-  .table th,
-  .table td {
-    padding: 12px;
+  .btn-sm {
+    @apply h-[48px] px-6 text-sm;
   }
-
-  .form-label {
-    font-size: 12px;
+  .btn-lg {
+    @apply h-[56px] px-10 text-base;
   }
-
-  /* Additional styles for navigation bar */
-  /* Adjust the styles based on your navigation bar structure */
-  nav {
-    /* Add styles to make the navigation bar more responsive */
-    height: auto;
-    background-color: #333; /* Adjust as needed */
-    padding: 10px; /* Adjust as needed */
+  .btn-link {
+    @apply text-base;
   }
-
-  nav a {
-    /* Adjust link styles in the navigation bar */
-    color: #fff; /* Adjust as needed */
+  .text-gradient {
+    @apply bg-gradient-to-r text-transparent bg-clip-text from-[#42A6E3] to-[#FF56F6] font-bold font-primary hover:from-[#FF56F6] hover:to-[#42A6E3];
   }
-
-  /* Decreased search bar width and height */
-  .dropdown-container .dropdown {
-    width: 80%; /* Adjusted width for the search bar */
-    padding: 8px; /* Adjusted padding for the search bar */
+  .section {
+    @apply py-8 lg:py-24 lg:h-screen flex items-center;
   }
 }
-
-
-
-/* Custom Styles for Dropdown */
-.dropdown-container .dropdown {
-  margin-left: auto;
-  position: relative;
-}
-
-.dropdown-container .dropdown:hover .dropdown-content {
-  display: block;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #17a2b8; /* Cyan color */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  padding: 10px;
-  z-index: 1;
-}
-
-.dropdown-content a {
-  color: #fff; /* White text */
-  padding: 8px 16px;
-  text-decoration: none;
-  display: block;
-  transition: background-color 0.3s ease;
-}
-
-.dropdown-content a:hover {
-  background-color: #138496; /* Darker Cyan color on hover */
-}
-
-/* Adjusted styles for mobile */
-@media (max-width: 600px) {
-  /* ... (other styles) */
-
-  .dropdown-content {
-    width: 80%; /* Adjusted width for the dropdown content */
-    padding: 10px; /* Adjusted padding for the dropdown content */
-  }
-}
-
-
-
-
-/* Updated Form Label Styles for a more refined look */
-.form-label {
-  font-size: 14px;
-  color: #0093bc; /* A shade of blue for form labels */
-  transition: top 0.3s ease, font-size 0.3s ease, color 0.3s ease;
-  font-weight: bold; /* Slightly bolder font weight */
-}
-
-/* Animation effect on focus and for valid inputs */
-.form-control:focus + .form-label,
-.form-control:valid + .form-label {
-  top: 0;
-  font-size: 12px;
-  color: #00eeff; /* Blue color on focus and when the input has a value */
-}
-
-/* Additional styles for improved alignment and spacing */
-.form-group {
-  margin-bottom: 25px; /* Increased margin for better spacing between form groups */
-}
-
-/* Adjusted button styles for a more modern look */
-.button-container button {
-  padding: 12px 20px; /* Increased padding for better touch */
-  font-size: 16px; /* Slightly larger font size */
-}
-
-/* Modal Body Styles */
-.modal-body {
-  padding: 30px; /* Increased padding for better spacing */
-}
-
-/* Radio Button Styles */
-.form-check-inline {
-  margin-right: 20px; /* Increased margin between radio buttons for better alignment */
-}
-
-
-
